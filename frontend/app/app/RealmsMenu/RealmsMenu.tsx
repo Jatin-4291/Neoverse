@@ -56,6 +56,8 @@ const RealmsMenu: React.FC<RealmsMenuProps> = ({ realms, errorMessage }) => {
       { realmIds: realms.map((realm: any) => realm.id) },
       session.access_token
     );
+    console.log(playerCountData, playerCountsError);
+
     if (playerCountData) {
       setPlayerCounts(playerCountData.playerCounts);
     }

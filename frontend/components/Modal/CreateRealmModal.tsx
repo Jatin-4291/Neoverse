@@ -59,7 +59,7 @@ const CreateRealmModal: React.FC = () => {
       revalidate("/app");
       setModal("None");
       toast.success("Your space has been created!");
-      router.push(`/editor/${data[0].id}`);
+      // router.push(`/editor/${data[0].id}`);
     }
 
     setLoading(false);
@@ -72,30 +72,38 @@ const CreateRealmModal: React.FC = () => {
 
   return (
     <Modal open={modal === "Create Realm"} closeOnOutsideClick>
-      <div className="flex flex-col items-center p-4 w-[400px] gap-4">
-        <h1 className="text-2xl">Create a Space</h1>
-        <BasicInput
-          label={"Space Name"}
-          className="w-[280px]"
-          value={realmName}
-          onChange={onChange}
-          maxLength={32}
-        />
-        <div className="flex items-center gap-2 w-[280px]">
+      <div className="flex flex-col items-center bg-white rounded-2xl shadow-xl p-6 w-[400px] gap-5">
+        <h1 className="text-2xl font-semibold text-gray-800">Create a Space</h1>
+        <div className="flex flex-row gap-2">
+          <p className="text-sm text-gray-700 mt-10">Enter Space Name</p>
+          <BasicInput
+            label="Space Name"
+            className="w-full"
+            value={realmName}
+            onChange={onChange}
+            maxLength={32}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 w-full">
           <input
             type="checkbox"
             id="useDefaultMap"
             checked={useDefaultMap}
             onChange={(e) => setUseDefaultMap(e.target.checked)}
+            className="h-4 w-4 accent-indigo-600"
           />
-          <label htmlFor="useDefaultMap">Use starter map</label>
+          <label htmlFor="useDefaultMap" className="text-sm text-gray-700">
+            Use starter map
+          </label>
         </div>
+
         <BasicButton
           disabled={realmName.length <= 0 || loading}
           onClick={createRealm}
-          className="text-lg"
+          className="w-full text-lg bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed transition"
         >
-          Create
+          {loading ? "Creating..." : "Create"}
         </BasicButton>
       </div>
     </Modal>

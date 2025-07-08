@@ -22,6 +22,7 @@ export default async function App() {
     .from("realms")
     .select("id, name, share_id")
     .eq("owner_id", user.id);
+  console.log("Owned Realms:", ownedRealms, "Error:", error);
   if (ownedRealms) {
     realms.push(...ownedRealms);
   }
@@ -38,10 +39,12 @@ export default async function App() {
   }
   const errorMessage = error?.message || "";
 
+  console.log("Realms:", realms);
+
   return (
     <div>
       <Navbar />
-      <h1 className="text-3xl pl-4 sm:pl-8 pt-8">Your Spaces</h1>
+      <h1 className="text-3xl mt-20 ml-4">Your Spaces</h1>
       <RealmsMenu realms={realms} errorMessage={errorMessage} />
     </div>
   );

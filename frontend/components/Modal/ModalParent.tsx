@@ -21,10 +21,10 @@ const ModalParent: React.FC = () => {
           <CreateRealmModal />
           <AccountDropdown />
           <LoadingModal />
-          <DeleteRoomModal />
-          <TeleportModal />
+          {/* <DeleteRoomModal /> */}
+          {/* <TeleportModal /> */}
           <DeleteRealmModal />
-          <SkinMenu />
+          {/* <SkinMenu /> */}
         </>
       )}
       <FailedToConnectModal />
