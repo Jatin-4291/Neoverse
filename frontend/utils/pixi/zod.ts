@@ -18,7 +18,7 @@ const TileMapSchema = z.record(
 );
 const RoomSchema = z.object({
   name: z.string(),
-  timemap: TileMapSchema,
+  tilemap: TileMapSchema,
   channelId: z.string().optional(),
 });
 const RealmDataSchema = z.object({

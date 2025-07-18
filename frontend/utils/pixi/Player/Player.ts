@@ -163,6 +163,13 @@ export class Player {
       y: Math.floor(y / 32),
     };
   };
+  public moveToTile=(x:number,y:number){
+      const start:Coordinate=[this.currentTilePosition.x, this.currentTilePosition.y];
+      const end:Coordinate=[x,y];
+      // if (this.isLocal) {
+      //       server.socket.emit('movePlayer', { x, y })
+      //   }
+  }
   public keydown = (event: KeyboardEvent) => {
     if (this.frozen) return;
 
@@ -186,4 +193,44 @@ export class Player {
   public setMovementMode = (mode: "keyboard" | "mouse") => {
     this.movementMode = mode;
   };
+
+    public setFrozen = (frozen: boolean) => {
+        this.frozen = frozen
+    }
+
+    public destroy() {
+        PIXI.Ticker.shared.remove(this.move)
+    }
+  public checkIfShouldJoinChannel = (newTilePosition: Point) => {
+        if (!this.isLocal) return
+
+        const tile = this.playApp.realmData.rooms[this.playApp.currentRoomIndex].tilemap[`${newTilePosition.x}, ${newTilePosition.y}`]
+        if (tile && tile.privateAreaId) {
+            if (tile.privateAreaId !== this.currentChannel) {
+                this.currentChannel = tile.privateAreaId
+                videoChat.joinChannel(tile.privateAreaId, this.playApp.uid + this.username, this.playApp.realmId)
+                this.playApp.fadeInTiles(tile.privateAreaId)
+            }
+        } else {
+            if (this.playApp.proximityId) {
+                if (this.playApp.proximityId !== this.currentChannel) {
+                    this.currentChannel = this.playApp.proximityId
+                    videoChat.joinChannel(this.playApp.proximityId, this.playApp.uid + this.username, this.playApp.realmId)
+                    this.playApp.fadeOutTiles()
+                }
+            } else if (this.currentChannel !== 'local') {
+                this.currentChannel = 'local'
+                videoChat.leaveChannel()
+                this.playApp.fadeOutTiles()
+            }
+        }
+    }
+     public changeAnimationState = (state: AnimationState, force: boolean = false) => {
+        if (this.animationState === state && !force) return
+
+        this.animationState = state
+        const animatedSprite = this.parent.children[0] as PIXI.AnimatedSprite
+        animatedSprite.textures = this.sheet.animations[state]
+        animatedSprite.play()
+    }
 }

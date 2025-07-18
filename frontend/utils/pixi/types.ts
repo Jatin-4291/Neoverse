@@ -12,6 +12,9 @@ export type Point = {
 export interface SpriteMap {
   [key: TilePoint]: Sprite;
 }
+export interface ColliderMap {
+  [key: TilePoint]: boolean;
+}
 export type Coordinate = [number, number];
 export type AnimationState =
   | "idle_down"
