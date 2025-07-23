@@ -1,3 +1,5 @@
+import { grasslandsSpriteSheetData } from "./grasslands";
+import { villageSpriteSheetData } from "./village";
 import { groundSpriteSheetData } from "./ground";
 import * as PIXI from "pixi.js";
 import { SpriteSheetData } from "./spriteSheetData";
@@ -15,26 +17,32 @@ export type Collider = {
   x: number;
   y: number;
 };
+export type SheetName = "ground" | "grasslands" | "village";
 type Sheets = {
-  [key in "ground"]?: PIXI.Spritesheet;
+  [key in SheetName]?: PIXI.Spritesheet;
 };
 class Sprites {
+  public spriteSheetDataSet: { [key in SheetName]: SpriteSheetData } = {
+    ground: groundSpriteSheetData,
+    grasslands: grasslandsSpriteSheetData,
+    village: villageSpriteSheetData,
+  };
   public sheets: Sheets = {};
-  public async load() {
-    if (!groundSpriteSheetData) {
+  public async load(sheetName: SheetName) {
+    if (!this.spriteSheetDataSet[sheetName]) {
       throw new Error(`Sprite sheet not found`);
     }
-    if (this.sheets["ground"]) {
+    if (this.sheets[sheetName]) {
       return;
     }
-    await PIXI.Assets.load(groundSpriteSheetData.url);
-    this.sheets["ground"] = new PIXI.Spritesheet(
-      PIXI.Texture.from(groundSpriteSheetData.url),
-      this.getSpriteSheetData(groundSpriteSheetData)
+    await PIXI.Assets.load(this.spriteSheetDataSet[sheetName].url);
+    this.sheets[sheetName] = new PIXI.Spritesheet(
+      PIXI.Texture.from(this.spriteSheetDataSet[sheetName].url),
+      this.getSpriteSheetData(this.spriteSheetDataSet[sheetName])
     );
-    await this.sheets["ground"].parse();
+    await this.sheets[sheetName].parse();
   }
-  public getSprite(sheetName: "ground", spriteName: string) {
+  public getSprite(sheetName: SheetName, spriteName: string) {
     const sheet = this.sheets[sheetName];
     if (!sheet) {
       throw new Error(`Sprite sheet ${sheetName} not found`);
@@ -47,22 +55,22 @@ class Sprites {
     return spriteInstance;
   }
 
-  public getSpriteData = (sheetname: "ground", spriteName: string) => {
-    if (!groundSpriteSheetData) {
+  public getSpriteData = (sheetname: SheetName, spriteName: string) => {
+    if (!this.spriteSheetDataSet[sheetname]) {
       throw new Error(`Sprite sheet ${sheetname} not found`);
     }
-    if (!groundSpriteSheetData.sprites[spriteName]) {
+    if (!this.spriteSheetDataSet[sheetname].sprites[spriteName]) {
       throw new Error(`Sprite ${spriteName} not found in sheet ${sheetname}`);
     }
-    return groundSpriteSheetData.sprites[spriteName];
+    return this.spriteSheetDataSet[sheetname].sprites[spriteName];
   };
 
   public async getSpriteForTileJSON(tileName: string) {
     const [sheetName, spriteName] = tileName.split("-");
-    this.load();
+    this.load(sheetName as SheetName);
     return {
-      sprite: this.getSprite(sheetName as "ground", spriteName),
-      data: this.getSpriteData(sheetName as "ground", spriteName),
+      sprite: this.getSprite(sheetName as SheetName, spriteName),
+      data: this.getSpriteData(sheetName as SheetName, spriteName),
     };
   }
   private getSpriteSheetData(sheetData: SpriteSheetData) {

@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
-import { Layer, RealmData, ColliderMap, Room } from "./types";
-import { sprites } from "./spritesheet/spritesheet";
+import { Layer, RealmData, ColliderMap, Room, TilePoint } from "./types";
+import { sprites, Collider } from "./spritesheet/spritesheet";
+PIXI.TextureStyle.defaultOptions.scaleMode = "nearest";
 export class App {
   protected app: PIXI.Application = new PIXI.Application();
   protected initialized: boolean = false;
@@ -33,6 +34,13 @@ export class App {
     this.app.stage.addChild(this.layers.above_floor);
     this.app.stage.addChild(this.layers.object);
   }
+  public getApp = () => {
+    if (!this.initialized) {
+      throw new Error("App not initialized");
+    }
+
+    return this.app;
+  };
   protected async loadRoomFromData(room: Room) {
     this.layers.floor.removeChildren();
     this.layers.above_floor.removeChildren();
@@ -95,10 +103,39 @@ export class App {
       });
     }
   };
+  protected getTileCoordinatesOfCollider = (
+    collider: Collider,
+    sprite: PIXI.Sprite
+  ) => {
+    const topLeftX = sprite.x - sprite.width * sprite.anchor.x;
+    const topLeftY = sprite.y - sprite.height * sprite.anchor.y;
+
+    const gridCoordinates = this.convertScreenToTileCoordinates(
+      topLeftX,
+      topLeftY
+    );
+
+    return {
+      x: gridCoordinates.x + collider.x,
+      y: gridCoordinates.y + collider.y,
+    };
+  };
   public convertTileToScreenCoordinates = (x: number, y: number) => {
     return {
       x: x * 32,
       y: y * 32,
     };
   };
+  public convertScreenToTileCoordinates = (x: number, y: number) => {
+    const tileSize = 32;
+    return {
+      x: Math.floor(x / tileSize),
+      y: Math.floor(y / tileSize),
+    };
+  };
+  public destroy() {
+    if (this.initialized) {
+      this.app.destroy();
+    }
+  }
 }
