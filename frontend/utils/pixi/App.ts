@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Layer, RealmData, ColliderMap, Room } from "./types";
+import { sprites } from "./spritesheet/spritesheet";
 export class App {
   protected app: PIXI.Application = new PIXI.Application();
   protected initialized: boolean = false;
@@ -95,10 +96,9 @@ export class App {
     }
   };
   public convertTileToScreenCoordinates = (x: number, y: number) => {
-    const tileSize = 32;
     return {
-      x: x * tileSize,
-      y: y * tileSize,
+      x: x * 32,
+      y: y * 32,
     };
   };
 }

@@ -1,13 +1,7 @@
+import { groundSpriteSheetData } from "./ground";
 import * as PIXI from "pixi.js";
-import { grasslandsSpriteSheetData } from "./grassland";
+import { SpriteSheetData } from "./spriteSheetData";
 import { Layer } from "../types";
-import { SpriteSheetData } from "./SpriteSheetData";
-
-export type Collider = {
-  x: number;
-  y: number;
-};
-
 export interface SpriteSheetTile {
   name: string;
   x: number;
@@ -17,134 +11,100 @@ export interface SpriteSheetTile {
   layer?: Layer;
   colliders?: Collider[];
 }
-
-type Sheets = {
-  [key in SheetName]?: PIXI.Spritesheet;
+export type Collider = {
+  x: number;
+  y: number;
 };
-
-export type SheetName = "grasslands";
-
+type Sheets = {
+  [key in "ground"]?: PIXI.Spritesheet;
+};
 class Sprites {
-  public spriteSheetDataSet: { [key in SheetName]: SpriteSheetData } = {
-    grasslands: grasslandsSpriteSheetData,
-  };
   public sheets: Sheets = {};
-
-  public async load(sheetName: SheetName) {
-    if (!this.spriteSheetDataSet[sheetName]) {
-      throw new Error(`Sheet ${sheetName} not found`);
+  public async load() {
+    if (!groundSpriteSheetData) {
+      throw new Error(`Sprite sheet not found`);
     }
-
-    if (this.sheets[sheetName]) {
+    if (this.sheets["ground"]) {
       return;
     }
-
-    await PIXI.Assets.load(this.spriteSheetDataSet[sheetName].url);
-    this.sheets[sheetName] = new PIXI.Spritesheet(
-      PIXI.Texture.from(this.spriteSheetDataSet[sheetName].url),
-      this.getSpriteSheetData(this.spriteSheetDataSet[sheetName])
+    await PIXI.Assets.load(groundSpriteSheetData.url);
+    this.sheets["ground"] = new PIXI.Spritesheet(
+      PIXI.Texture.from(groundSpriteSheetData.url),
+      this.getSpriteSheetData(groundSpriteSheetData)
     );
-    await this.sheets[sheetName]!.parse();
+    await this.sheets["ground"].parse();
+  }
+  public getSprite(sheetName: "ground", spriteName: string) {
+    const sheet = this.sheets[sheetName];
+    if (!sheet) {
+      throw new Error(`Sprite sheet ${sheetName} not found`);
+    }
+    const sprite = sheet.textures[spriteName];
+    if (!sprite) {
+      throw new Error(`Sprite ${spriteName} not found in sheet ${sheetName}`);
+    }
+    const spriteInstance = new PIXI.Sprite(sprite);
+    return spriteInstance;
   }
 
-  public async getSpriteForTileJSON(tilename: string) {
-    const [sheetName, spriteName] = tilename.split("-");
-    await this.load(sheetName as SheetName);
+  public getSpriteData = (sheetname: "ground", spriteName: string) => {
+    if (!groundSpriteSheetData) {
+      throw new Error(`Sprite sheet ${sheetname} not found`);
+    }
+    if (!groundSpriteSheetData.sprites[spriteName]) {
+      throw new Error(`Sprite ${spriteName} not found in sheet ${sheetname}`);
+    }
+    return groundSpriteSheetData.sprites[spriteName];
+  };
+
+  public async getSpriteForTileJSON(tileName: string) {
+    const [sheetName, spriteName] = tileName.split("-");
+    this.load();
     return {
-      sprite: this.getSprite(sheetName as SheetName, spriteName),
-      data: this.getSpriteData(sheetName as SheetName, spriteName),
+      sprite: this.getSprite(sheetName as "ground", spriteName),
+      data: this.getSpriteData(sheetName as "ground", spriteName),
     };
   }
-
-  public getSprite(sheetName: SheetName, spriteName: string) {
-    if (!this.sheets[sheetName]) {
-      throw new Error(`Sheet ${sheetName} not found`);
-    }
-
-    if (!this.sheets[sheetName]!.textures[spriteName]) {
-      throw new Error(`Sprite ${spriteName} not found in sheet ${sheetName}`);
-    }
-
-    const sprite = new PIXI.Sprite(
-      this.sheets[sheetName]!.textures[spriteName]
-    );
-    return sprite;
-  }
-
-  public getSpriteLayer(sheetName: SheetName, spriteName: string) {
-    if (!this.spriteSheetDataSet[sheetName]) {
-      throw new Error(`Sheet ${sheetName} not found`);
-    }
-
-    if (!this.spriteSheetDataSet[sheetName].sprites[spriteName]) {
-      throw new Error(`Sprite ${spriteName} not found in sheet ${sheetName}`);
-    }
-
-    return (
-      this.spriteSheetDataSet[sheetName].sprites[spriteName].layer || "floor"
-    );
-  }
-
-  public getSpriteData(sheetName: SheetName, spriteName: string) {
-    if (!this.spriteSheetDataSet[sheetName]) {
-      throw new Error(`Sheet ${sheetName} not found`);
-    }
-
-    if (!this.spriteSheetDataSet[sheetName].sprites[spriteName]) {
-      throw new Error(`Sprite ${spriteName} not found in sheet ${sheetName}`);
-    }
-
-    return this.spriteSheetDataSet[sheetName].sprites[spriteName];
-  }
-
-  private getSpriteSheetData(data: SpriteSheetData) {
+  private getSpriteSheetData(sheetData: SpriteSheetData) {
     const spriteSheetData = {
       frames: {} as any,
       meta: {
-        image: data.url,
-        size: {
-          w: data.width,
-          h: data.height,
-        },
+        scale: "1",
         format: "RGBA8888",
-        scale: 1,
+        image: sheetData.url,
+        size: {
+          w: sheetData.width,
+          h: sheetData.height,
+        },
       },
-      animations: {},
+      animation: {},
     };
-
-    for (const spriteData of data.spritesList) {
-      if (spriteData.name === "empty") {
-        continue;
-      }
-
-      spriteSheetData.frames[spriteData.name] = {
+    for (const sprite of sheetData.spritesList) {
+      spriteSheetData.frames[sprite.name] = {
         frame: {
-          x: spriteData.x,
-          y: spriteData.y,
-          w: spriteData.width,
-          h: spriteData.height,
+          x: sprite.x,
+          y: sprite.y,
+          w: sprite.width,
+          h: sprite.height,
         },
         spriteSourceSize: {
           x: 0,
           y: 0,
-          w: spriteData.width,
-          h: spriteData.height,
+          w: sprite.width,
+          h: sprite.height,
         },
         sourceSize: {
-          w: spriteData.width,
-          h: spriteData.height,
+          w: sprite.width,
+          h: sprite.height,
         },
         anchor: {
           x: 0,
-          y: 1 - 32 / spriteData.height,
+          y: 1 - 32 / sprite.height,
         },
       };
     }
-
     return spriteSheetData;
   }
 }
-
 const sprites = new Sprites();
-
 export { sprites };
