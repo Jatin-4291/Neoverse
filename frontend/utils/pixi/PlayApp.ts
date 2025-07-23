@@ -2,7 +2,7 @@ import { TilePoint, Point, RealmData, SpriteMap } from "./types";
 import * as PIXI from "pixi.js";
 import { gsap } from "gsap";
 import { Player } from "./Player/Player";
-
+import { App } from "./App";
 export class PlayApp extends App {
   private scale: number = 1.5;
   public player: Player;
