@@ -65,6 +65,10 @@ export class App {
     }
     this.sortObjectsByY();
   }
+  protected async loadRoom(index: number) {
+    const room = this.realmData.rooms[index];
+    await this.loadRoomFromData(room);
+  }
   public sortObjectsByY = () => {
     this.layers.object.children.forEach((child) => {
       child.zIndex = this.getZIndex(child);

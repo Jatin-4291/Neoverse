@@ -27,7 +27,7 @@ const RealmDataSchema = z.object({
     y: z.number(),
     roomIndex: z.number(),
   }),
-  room: z.array(RoomSchema),
+  rooms: z.array(RoomSchema),
 });
 
 export { RealmDataSchema, RoomSchema };
