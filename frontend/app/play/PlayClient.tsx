@@ -5,9 +5,8 @@ import { RealmData } from "@/utils/pixi/types";
 import PlayNavbar from "./PlayNavbar";
 import { useModal } from "../hooks/useModal";
 import signal from "@/utils/signal";
-import IntroScreen from "./IntroScreen";
-import VideoBar from "@/components/VideoChat/VideoBar";
-import { AgoraVideoChatProvider } from "../hooks/useVideoChat";
+// import IntroScreen from "./IntroScreen";
+// import VideoBar from "@/components/VideoChat/VideoBar";
 type PlayClientProps = {
   mapData: RealmData;
   username: string;
@@ -31,7 +30,7 @@ const PlayClient: React.FC<PlayClientProps> = ({
 }) => {
   const { setErrorModal, setDisconnectedMessage } = useModal();
 
-  const [showIntroScreen, setShowIntroScreen] = useState(true);
+  const [showIntroScreen, setShowIntroScreen] = useState(false);
 
   const [skin, setSkin] = useState(initialSkin);
 
@@ -62,10 +61,10 @@ const PlayClient: React.FC<PlayClientProps> = ({
   }, []);
 
   return (
-    <AgoraVideoChatProvider uid={uid}>
+    <>
       {!showIntroScreen && (
         <div className="relative w-full h-screen flex flex-col-reverse sm:flex-col">
-          <VideoBar />
+          {/* <VideoBar /> */}
           <PixiApp
             mapData={mapData}
             className="w-full grow sm:h-full sm:flex-grow-0"
@@ -76,18 +75,18 @@ const PlayClient: React.FC<PlayClientProps> = ({
             shareId={shareId}
             initialSkin={skin}
           />
-          <PlayNavbar username={username} skin={skin} />
+          {/* <PlayNavbar username={username} skin={skin} />   */}
         </div>
       )}
-      {showIntroScreen && (
+      {/* {showIntroScreen && (
         <IntroScreen
           realmName={name}
           skin={skin}
           username={username}
           setShowIntroScreen={setShowIntroScreen}
         />
-      )}
-    </AgoraVideoChatProvider>
+      )} */}
+    </>
   );
 };
 export default PlayClient;

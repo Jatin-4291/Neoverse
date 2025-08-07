@@ -4,7 +4,7 @@ import { sprites, Collider } from "./spritesheet/spritesheet";
 PIXI.TextureStyle.defaultOptions.scaleMode = "nearest";
 export class App {
   protected app: PIXI.Application = new PIXI.Application();
-  protected initialized: boolean = false;
+  protected initialized: boolean = true;
   protected layers: { [key in Layer]: PIXI.Container } = {
     floor: new PIXI.Container(),
     above_floor: new PIXI.Container(),

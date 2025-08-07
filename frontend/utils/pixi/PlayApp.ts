@@ -52,6 +52,13 @@ export class PlayApp extends App {
   private resizeEvent = () => {
     this.moveCameraToPlayer();
   };
+  private async loadAssets() {
+    await Promise.all([
+      PIXI.Assets.load("/fonts/silkscreen.ttf"),
+      PIXI.Assets.load("/fonts/nunito.ttf"),
+      PIXI.Assets.load("/faded-tile.png"),
+    ]);
+  }
   private setScale = (newScale: number) => {
     this.scale = newScale;
     this.app.stage.scale.set(this.scale);

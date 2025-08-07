@@ -32,9 +32,11 @@ class Sprites {
     if (!this.spriteSheetDataSet[sheetName]) {
       throw new Error(`Sprite sheet not found`);
     }
+
     if (this.sheets[sheetName]) {
       return;
     }
+
     await PIXI.Assets.load(this.spriteSheetDataSet[sheetName].url);
     this.sheets[sheetName] = new PIXI.Spritesheet(
       PIXI.Texture.from(this.spriteSheetDataSet[sheetName].url),
@@ -42,8 +44,18 @@ class Sprites {
     );
     await this.sheets[sheetName].parse();
   }
+
+  public async getSpriteForTileJSON(tileName: string) {
+    const [sheetName, spriteName] = tileName.split("-");
+    await this.load(sheetName as SheetName);
+    return {
+      sprite: this.getSprite(sheetName as SheetName, spriteName),
+      data: this.getSpriteData(sheetName as SheetName, spriteName),
+    };
+  }
   public getSprite(sheetName: SheetName, spriteName: string) {
     const sheet = this.sheets[sheetName];
+
     if (!sheet) {
       throw new Error(`Sprite sheet ${sheetName} not found`);
     }
@@ -54,7 +66,6 @@ class Sprites {
     const spriteInstance = new PIXI.Sprite(sprite);
     return spriteInstance;
   }
-
   public getSpriteData = (sheetname: SheetName, spriteName: string) => {
     if (!this.spriteSheetDataSet[sheetname]) {
       throw new Error(`Sprite sheet ${sheetname} not found`);
@@ -64,15 +75,6 @@ class Sprites {
     }
     return this.spriteSheetDataSet[sheetname].sprites[spriteName];
   };
-
-  public async getSpriteForTileJSON(tileName: string) {
-    const [sheetName, spriteName] = tileName.split("-");
-    this.load(sheetName as SheetName);
-    return {
-      sprite: this.getSprite(sheetName as SheetName, spriteName),
-      data: this.getSpriteData(sheetName as SheetName, spriteName),
-    };
-  }
   private getSpriteSheetData(sheetData: SpriteSheetData) {
     const spriteSheetData = {
       frames: {} as any,

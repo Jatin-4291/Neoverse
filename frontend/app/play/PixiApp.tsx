@@ -28,34 +28,34 @@ const PixiApp: React.FC<PixiAppProps> = ({
   initialSkin,
 }) => {
   const appRef = useRef<PlayApp | null>(null);
-  const {
-    setModal,
-    setLoadingText,
-    setFailedConnectionMessage,
-    setErrorModal,
-  } = useModal();
+  // const {
+  //   setModal,
+  //   setLoadingText,
+  //   setFailedConnectionMessage,
+  //   setErrorModal,
+  // } = useModal();
 
   useEffect(() => {
     const mount = async () => {
       const app = new PlayApp(uid, realmId, mapData, username, initialSkin);
       appRef.current = app;
-      setModal("Loading");
-      setLoadingText("Connecting to server...");
-      const { success, errorMessage } = await server.connect(
-        realmId,
-        uid,
-        shareId,
-        access_token
-      );
-      if (!success) {
-        setErrorModal("Failed To Connect");
-        setFailedConnectionMessage(errorMessage);
-        return;
-      }
+      // setModal("Loading");
+      // setLoadingText("Connecting to server...");
+      // const { success, errorMessage } = await server.connect(
+      //   realmId,
+      //   uid,
+      //   shareId,
+      //   access_token
+      // );
+      // if (!success) {
+      //   setErrorModal("Failed To Connect");
+      //   setFailedConnectionMessage(errorMessage);
+      //   return;
+      // }
 
-      setLoadingText("Loading game...");
+      // setLoadingText("Loading game...");
       await app.init();
-      setModal("None");
+      // setModal("None");
       const pixiApp = app.getApp();
 
       document.getElementById("app-container")!.appendChild(pixiApp.canvas);
