@@ -11,6 +11,7 @@ export class App {
     object: new PIXI.Container(),
   };
   public currentRoomIndex: number = 0;
+
   public realmData: RealmData;
   protected colliderFromSpritesMap: ColliderMap = {};
   protected backgroundColor: number = 0x0f0f0f;
@@ -29,6 +30,7 @@ export class App {
       roundPixels: true,
     });
     this.initialized = true;
+    console.log(this.layers.above_floor);
 
     this.app.stage.addChild(this.layers.floor);
     this.app.stage.addChild(this.layers.above_floor);
@@ -45,6 +47,7 @@ export class App {
     this.layers.floor.removeChildren();
     this.layers.above_floor.removeChildren();
     this.layers.object.removeChildren();
+    this.colliderFromSpritesMap = {};
     for (const [tilePoint, tileData] of Object.entries(room.tilemap)) {
       const floor = tileData.floor;
       const above_floor = tileData.above_floor;
@@ -89,7 +92,9 @@ export class App {
     tileName: string
   ) => {
     const screenCoordinates = this.convertTileToScreenCoordinates(x, y);
+
     const { sprite, data } = await sprites.getSpriteForTileJSON(tileName);
+
     sprite.position.set(screenCoordinates.x, screenCoordinates.y);
     this.layers[layer].addChild(sprite);
 
@@ -103,7 +108,7 @@ export class App {
 
         const key =
           `${colliderCoordinates.x}, ${colliderCoordinates.y}` as TilePoint;
-        this.collidersFromSpritesMap[key] = true;
+        this.colliderFromSpritesMap[key] = true;
       });
     }
   };

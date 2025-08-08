@@ -37,7 +37,7 @@ export class PlayApp extends App {
   public async init() {
     await super.init();
     await this.loadAssets();
-    await this.loadRoom(this.currentRoomIndex);
+    await this.loadRoom(this.realmData.spawnpoint.roomIndex);
     this.app.stage.eventMode = "static";
     this.setScale(this.scale);
     this.app.renderer.on("resize", this.resizeEvent);
@@ -46,8 +46,8 @@ export class PlayApp extends App {
     this.clickEvents();
     this.setUpKeyboardEvents();
     this.setUpFadeOverlay();
-    this.setUpSignalListeners();
-    this.setUpSocketEvents();
+    // this.setUpSignalListeners();
+    // this.setUpSocketEvents();
   }
   private resizeEvent = () => {
     this.moveCameraToPlayer();
@@ -70,8 +70,8 @@ export class PlayApp extends App {
     this.setUpBlockedTiles();
     this.setUpFadeTiles();
     this.spawnLocalPlayer();
-    await this.syncOtherPlayers();
-    this.displayInitialChatMessage();
+    // await this.syncOtherPlayers();
+    // this.displayInitialChatMessage();
   }
   private setUpBlockedTiles() {
     this.blocked = new Set<TilePoint>();
@@ -88,6 +88,17 @@ export class PlayApp extends App {
       }
     }
   }
+  private setUpFadeOverlay = () => {
+    this.fadeOverlay.rect(
+      0,
+      0,
+      this.app.screen.width * (1 / this.scale),
+      this.app.screen.height * (1 / this.scale)
+    );
+    this.fadeOverlay.fill(0x0f0f0f);
+    this.app.stage.addChild(this.fadeOverlay);
+  };
+
   private setUpFadeTiles() {
     this.fadeTiles = {};
     this.fadeTileContainer.removeChildren();

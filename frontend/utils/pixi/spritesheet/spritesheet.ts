@@ -44,7 +44,6 @@ class Sprites {
     );
     await this.sheets[sheetName].parse();
   }
-
   public async getSpriteForTileJSON(tileName: string) {
     const [sheetName, spriteName] = tileName.split("-");
     await this.load(sheetName as SheetName);
@@ -60,6 +59,7 @@ class Sprites {
       throw new Error(`Sprite sheet ${sheetName} not found`);
     }
     const sprite = sheet.textures[spriteName];
+
     if (!sprite) {
       throw new Error(`Sprite ${spriteName} not found in sheet ${sheetName}`);
     }
@@ -75,7 +75,9 @@ class Sprites {
     }
     return this.spriteSheetDataSet[sheetname].sprites[spriteName];
   };
+
   private getSpriteSheetData(sheetData: SpriteSheetData) {
+    console.log(sheetData.url);
     const spriteSheetData = {
       frames: {} as any,
       meta: {

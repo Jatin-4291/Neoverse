@@ -69,10 +69,12 @@ export class Player {
     this.isLocal = isLocal;
   }
   private async loadAnimations() {
-    const src = `/sprites/characters/Character_${this.skin}.png`;
+    const src = `/sprites/characters/Character_009.png`;
     await PIXI.Assets.load(src);
     const spriteSheetData = JSON.parse(JSON.stringify(playerSpriteSheetData));
     this.sheet = new PIXI.Spritesheet(PIXI.Texture.from(src), spriteSheetData);
+    await this.sheet.parse();
+
     const animatedSprite = new PIXI.AnimatedSprite(
       this.sheet.animations["idle_down"]
     );

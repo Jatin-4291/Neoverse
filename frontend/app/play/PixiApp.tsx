@@ -57,6 +57,7 @@ const PixiApp: React.FC<PixiAppProps> = ({
       await app.init();
       // setModal("None");
       const pixiApp = app.getApp();
+      console.log(pixiApp.canvas);
 
       document.getElementById("app-container")!.appendChild(pixiApp.canvas);
     };
