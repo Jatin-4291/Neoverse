@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { PlayApp } from "../PlayApp";
 import { Coordinate, Point, Direction, AnimationState } from "../types";
 import playerSpriteSheetData from "./PlayerSpriteSheetData";
+import { bfs } from "../pathFinding";
 function formatText(message: string, maxLength: number): string {
   message = message.trim();
   const words = message.split(" ");
@@ -165,18 +166,72 @@ export class Player {
       y: Math.floor(y / 32),
     };
   };
-  public moveToTile = (x: number, y: number) => {
-    const start: Coordinate = [
-      this.currentTilePosition.x,
-      this.currentTilePosition.y,
-    ];
-    this.targetPosition = { x, y };
+  // public moveToTile = (x: number, y: number) => {
+  //   const start: Coordinate = [
+  //     this.currentTilePosition.x,
+  //     this.currentTilePosition.y,
+  //   ];
+  //   const end: Coordinate = [x, y];
+  //   const path: Coordinate[] | null = bfs(start, end, this.playApp.blocked);
+  //   PIXI.Ticker.shared.remove(this.move);
+  //   this.path = path;
+  //   this.pathIndex = 0;
+  //   this.targetPosition = this.convertTilePosToPlayerPos(
+  //     this.path[this.pathIndex][0],
+  //     this.path[this.pathIndex][1]
+  //   );
+  //   PIXI.Ticker.shared.add(this.move);
 
-    PIXI.Ticker.shared.remove(this.move);
-    // PIXI.Ticker.shared.add(this.move);
-    //       server.socket.emit('movePlayer', { x, y })
-    //   }
+  //   // PIXI.Ticker.shared.add(this.move);
+  //   //       server.socket.emit('movePlayer', { x, y })
+  //   //   }
+  // };
+  // private move = ({ deltaTime }: { deltaTime: number }) => {
+  //   if (!this.targetPosition) return;
+  //   const currentPos = this.convertPlayerPosToTilePos(
+  //     this.parent.x,
+  //     this.parent.y
+  //   );
+  //   // this.checkIfShouldJoinChannel(currentPos);
+  //   this.currentTilePosition = {
+  //     x: this.path[this.pathIndex][0],
+  //     y: this.path[this.pathIndex][1],
+  //   };
+  // };
+  private moveToTile2 = (x: number, y: number) => {
+    const targetTile: Coordinate = [x, y];
+    if (this.playApp.blocked.has(`${targetTile[0]}, ${targetTile[1]}`)) {
+      return;
+    }
+    this.targetPosition = this.convertTilePosToPlayerPos(
+      targetTile[0],
+      targetTile[1]
+    );
+
+    // Smooth move with PIXI Ticker
+    PIXI.Ticker.shared.remove(this.move2);
+    PIXI.Ticker.shared.add(this.move2);
   };
+  private move2 = ({ deltaTime }: { deltaTime: number }) => {
+    if (!this.targetPosition) return;
+
+    const speed = this.movementSpeed * deltaTime;
+    const dx = this.targetPosition.x - this.parent.x;
+    const dy = this.targetPosition.y - this.parent.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < speed) {
+      this.parent.x = this.targetPosition.x;
+      this.parent.y = this.targetPosition.y;
+      PIXI.Ticker.shared.remove(this.move2); // stop moving
+      return;
+    }
+
+    const angle = Math.atan2(dy, dx);
+    this.parent.x += Math.cos(angle) * speed;
+    this.parent.y += Math.sin(angle) * speed;
+  };
+
   public keydown = (event: KeyboardEvent) => {
     if (this.frozen) return;
 
@@ -192,7 +247,7 @@ export class Player {
       movementInput.x += 1;
     }
 
-    this.moveToTile(
+    this.moveToTile2(
       this.currentTilePosition.x + movementInput.x,
       this.currentTilePosition.y + movementInput.y
     );
