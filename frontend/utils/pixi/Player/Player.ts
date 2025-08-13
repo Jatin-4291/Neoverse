@@ -170,8 +170,10 @@ export class Player {
       this.currentTilePosition.x,
       this.currentTilePosition.y,
     ];
-    const end: Coordinate = [x, y];
-    // if (this.isLocal) {
+    this.targetPosition = { x, y };
+
+    PIXI.Ticker.shared.remove(this.move);
+    // PIXI.Ticker.shared.add(this.move);
     //       server.socket.emit('movePlayer', { x, y })
     //   }
   };

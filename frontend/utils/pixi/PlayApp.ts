@@ -48,6 +48,7 @@ export class PlayApp extends App {
     this.setUpFadeOverlay();
     // this.setUpSignalListeners();
     // this.setUpSocketEvents();
+    this.fadeOut();
   }
   private resizeEvent = () => {
     this.moveCameraToPlayer();
@@ -75,6 +76,7 @@ export class PlayApp extends App {
   }
   private setUpBlockedTiles() {
     this.blocked = new Set<TilePoint>();
+
     for (const [key, value] of Object.entries(
       this.realmData.rooms[this.currentRoomIndex].tilemap
     )) {
@@ -82,7 +84,7 @@ export class PlayApp extends App {
         this.blocked.add(key as TilePoint);
       }
     }
-    for (const [key, value] of Object.entries(this.colliderFromSpritesMap)) {
+    for (const [key, value] of Object.entries(this.collidersFromSpritesMap)) {
       if (value) {
         this.blocked.add(key as TilePoint);
       }
@@ -102,7 +104,7 @@ export class PlayApp extends App {
   private setUpFadeTiles() {
     this.fadeTiles = {};
     this.fadeTileContainer.removeChildren();
-    for (const [key, value] of Object.entries(
+    for (const [key] of Object.entries(
       this.realmData.rooms[this.currentRoomIndex].tilemap
     )) {
       const [x, y] = key.split(",").map(Number);
@@ -169,10 +171,37 @@ export class PlayApp extends App {
   private keydown = (event: KeyboardEvent) => {
     if (this.keysDown.includes(event.key) || this.disableInput) return;
     this.player.keydown(event);
+
     this.keysDown.push(event.key);
   };
 
   private keyup = (event: KeyboardEvent) => {
     this.keysDown = this.keysDown.filter((key) => key !== event.key);
   };
+  private fadeOut = () => {
+    PIXI.Ticker.shared.add(this.fadeOutTicker);
+  };
+  private fadeOutTicker = ({ deltaTime }: { deltaTime: number }) => {
+    this.fadeOverlay.alpha -= deltaTime / 60 / this.fadeDuration;
+    if (this.fadeOverlay.alpha <= 0) {
+      this.fadeOverlay.alpha = 0;
+      PIXI.Ticker.shared.remove(this.fadeOutTicker);
+    }
+  };
+  private removeEvents = () => {
+    // this.removeSocketEvents();
+    // this.destroyPlayers();
+    // server.disconnect();
+
+    PIXI.Ticker.shared.destroy();
+
+    // this.removeSignalListeners();
+    document.removeEventListener("keydown", this.keydown);
+    document.removeEventListener("keyup", this.keyup);
+  };
+
+  public destroy() {
+    this.removeEvents();
+    super.destroy();
+  }
 }
