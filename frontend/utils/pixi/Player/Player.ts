@@ -166,56 +166,57 @@ export class Player {
       y: Math.floor(y / 32),
     };
   };
-  // public moveToTile = (x: number, y: number) => {
-  //   const start: Coordinate = [
-  //     this.currentTilePosition.x,
-  //     this.currentTilePosition.y,
-  //   ];
-  //   const end: Coordinate = [x, y];
-  //   const path: Coordinate[] | null = bfs(start, end, this.playApp.blocked);
-  //   PIXI.Ticker.shared.remove(this.move);
-  //   this.path = path;
-  //   this.pathIndex = 0;
-  //   this.targetPosition = this.convertTilePosToPlayerPos(
-  //     this.path[this.pathIndex][0],
-  //     this.path[this.pathIndex][1]
-  //   );
-  //   PIXI.Ticker.shared.add(this.move);
+  public moveToTile = (x: number, y: number) => {
+    if (this.strikes > 25) return;
 
-  //   // PIXI.Ticker.shared.add(this.move);
-  //   //       server.socket.emit('movePlayer', { x, y })
-  //   //   }
-  // };
-  // private move = ({ deltaTime }: { deltaTime: number }) => {
-  //   if (!this.targetPosition) return;
-  //   const currentPos = this.convertPlayerPosToTilePos(
-  //     this.parent.x,
-  //     this.parent.y
-  //   );
-  //   // this.checkIfShouldJoinChannel(currentPos);
-  //   this.currentTilePosition = {
-  //     x: this.path[this.pathIndex][0],
-  //     y: this.path[this.pathIndex][1],
-  //   };
-  // };
-  private moveToTile2 = (x: number, y: number) => {
-    const targetTile: Coordinate = [x, y];
-    if (this.playApp.blocked.has(`${targetTile[0]}, ${targetTile[1]}`)) {
+    const start: Coordinate = [
+      this.currentTilePosition.x,
+      this.currentTilePosition.y,
+    ];
+    const end: Coordinate = [x, y];
+
+    const path: Coordinate[] | null = bfs(start, end, this.playApp.blocked);
+    if (!path || path.length === 0) {
+      if (!path && !this.isLocal) {
+        this.strikes++;
+      }
       return;
     }
-    this.targetPosition = this.convertTilePosToPlayerPos(
-      targetTile[0],
-      targetTile[1]
-    );
 
-    // Smooth move with PIXI Ticker
-    PIXI.Ticker.shared.remove(this.move2);
-    PIXI.Ticker.shared.add(this.move2);
+    PIXI.Ticker.shared.remove(this.move);
+
+    this.path = path;
+    this.pathIndex = 0;
+    this.targetPosition = this.convertTilePosToPlayerPos(
+      this.path[this.pathIndex][0],
+      this.path[this.pathIndex][1]
+    );
+    PIXI.Ticker.shared.add(this.move);
+
+    // if (this.isLocal) {
+    //   server.socket.emit("movePlayer", { x, y });
+    // }
   };
-  private move2 = ({ deltaTime }: { deltaTime: number }) => {
+  private move = ({ deltaTime }: { deltaTime: number }) => {
     if (!this.targetPosition) return;
 
+    const currentPos = this.convertPlayerPosToTilePos(
+      this.parent.x,
+      this.parent.y
+    );
+    // this.checkIfShouldJoinChannel(currentPos);
+
+    this.currentTilePosition = {
+      x: this.path[this.pathIndex][0],
+      y: this.path[this.pathIndex][1],
+    };
+
+    if (this.isLocal && this.movementMode === "keyboard") {
+      this.setFrozen(true);
+    }
+
     const speed = this.movementSpeed * deltaTime;
+
     const dx = this.targetPosition.x - this.parent.x;
     const dy = this.targetPosition.y - this.parent.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -223,14 +224,106 @@ export class Player {
     if (distance < speed) {
       this.parent.x = this.targetPosition.x;
       this.parent.y = this.targetPosition.y;
-      PIXI.Ticker.shared.remove(this.move2); // stop moving
-      return;
+
+      this.pathIndex++;
+      if (this.pathIndex < this.path.length) {
+        this.targetPosition = this.convertTilePosToPlayerPos(
+          this.path[this.pathIndex][0],
+          this.path[this.pathIndex][1]
+        );
+      } else {
+        const movementInput = this.getMovementInput();
+        const newTilePosition = {
+          x: this.currentTilePosition.x + movementInput.x,
+          y: this.currentTilePosition.y + movementInput.y,
+        };
+
+        if (
+          (movementInput.x !== 0 || movementInput.y !== 0) &&
+          !this.playApp.blocked.has(
+            `${newTilePosition.x}, ${newTilePosition.y}`
+          )
+        ) {
+          this.moveToTile(newTilePosition.x, newTilePosition.y);
+        }
+      }
+    } else {
+      const angle = Math.atan2(dy, dx);
+      this.parent.x += Math.cos(angle) * speed;
+      this.parent.y += Math.sin(angle) * speed;
+
+      // set direction
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+          this.direction = "right";
+        } else {
+          this.direction = "left";
+        }
+      } else {
+        if (dy > 0) {
+          this.direction = "down";
+        } else {
+          this.direction = "up";
+        }
+      }
+
+      this.changeAnimationState(`walk_${this.direction}` as AnimationState);
     }
 
-    const angle = Math.atan2(dy, dx);
-    this.parent.x += Math.cos(angle) * speed;
-    this.parent.y += Math.sin(angle) * speed;
+    this.playApp.sortObjectsByY();
+
+    if (this.isLocal) {
+      this.playApp.moveCameraToPlayer();
+    }
   };
+  private getMovementInput = () => {
+    const movementInput = { x: 0, y: 0 };
+    const latestKey = this.playApp.keysDown[this.playApp.keysDown.length - 1];
+    if (latestKey === "ArrowUp" || latestKey === "w") {
+      movementInput.y -= 1;
+    } else if (latestKey === "ArrowDown" || latestKey === "s") {
+      movementInput.y += 1;
+    } else if (latestKey === "ArrowLeft" || latestKey === "a") {
+      movementInput.x -= 1;
+    } else if (latestKey === "ArrowRight" || latestKey === "d") {
+      movementInput.x += 1;
+    }
+
+    return movementInput;
+  };
+  // private moveToTile2 = (x: number, y: number) => {
+  //   const targetTile: Coordinate = [x, y];
+  //   if (this.playApp.blocked.has(`${targetTile[0]}, ${targetTile[1]}`)) {
+  //     return;
+  //   }
+  //   this.targetPosition = this.convertTilePosToPlayerPos(
+  //     targetTile[0],
+  //     targetTile[1]
+  //   );
+
+  //   // Smooth move with PIXI Ticker
+  //   PIXI.Ticker.shared.remove(this.move2);
+  //   PIXI.Ticker.shared.add(this.move2);
+  // };
+  // private move2 = ({ deltaTime }: { deltaTime: number }) => {
+  //   if (!this.targetPosition) return;
+
+  //   const speed = this.movementSpeed * deltaTime;
+  //   const dx = this.targetPosition.x - this.parent.x;
+  //   const dy = this.targetPosition.y - this.parent.y;
+  //   const distance = Math.sqrt(dx * dx + dy * dy);
+
+  //   if (distance < speed) {
+  //     this.parent.x = this.targetPosition.x;
+  //     this.parent.y = this.targetPosition.y;
+  //     PIXI.Ticker.shared.remove(this.move2); // stop moving
+  //     return;
+  //   }
+
+  //   const angle = Math.atan2(dy, dx);
+  //   this.parent.x += Math.cos(angle) * speed;
+  //   this.parent.y += Math.sin(angle) * speed;
+  // };
 
   public keydown = (event: KeyboardEvent) => {
     if (this.frozen) return;
@@ -247,7 +340,7 @@ export class Player {
       movementInput.x += 1;
     }
 
-    this.moveToTile2(
+    this.moveToTile(
       this.currentTilePosition.x + movementInput.x,
       this.currentTilePosition.y + movementInput.y
     );
@@ -263,41 +356,41 @@ export class Player {
   public destroy() {
     PIXI.Ticker.shared.remove(this.move);
   }
-  public checkIfShouldJoinChannel = (newTilePosition: Point) => {
-    if (!this.isLocal) return;
+  // public checkIfShouldJoinChannel = (newTilePosition: Point) => {
+  //   if (!this.isLocal) return;
 
-    const tile =
-      this.playApp.realmData.rooms[this.playApp.currentRoomIndex].tilemap[
-        `${newTilePosition.x}, ${newTilePosition.y}`
-      ];
-    if (tile && tile.privateAreaId) {
-      if (tile.privateAreaId !== this.currentChannel) {
-        this.currentChannel = tile.privateAreaId;
-        videoChat.joinChannel(
-          tile.privateAreaId,
-          this.playApp.uid + this.username,
-          this.playApp.realmId
-        );
-        this.playApp.fadeInTiles(tile.privateAreaId);
-      }
-    } else {
-      if (this.playApp.proximityId) {
-        if (this.playApp.proximityId !== this.currentChannel) {
-          this.currentChannel = this.playApp.proximityId;
-          videoChat.joinChannel(
-            this.playApp.proximityId,
-            this.playApp.uid + this.username,
-            this.playApp.realmId
-          );
-          this.playApp.fadeOutTiles();
-        }
-      } else if (this.currentChannel !== "local") {
-        this.currentChannel = "local";
-        videoChat.leaveChannel();
-        this.playApp.fadeOutTiles();
-      }
-    }
-  };
+  //   const tile =
+  //     this.playApp.realmData.rooms[this.playApp.currentRoomIndex].tilemap[
+  //       `${newTilePosition.x}, ${newTilePosition.y}`
+  //     ];
+  //   if (tile && tile.privateAreaId) {
+  //     if (tile.privateAreaId !== this.currentChannel) {
+  //       this.currentChannel = tile.privateAreaId;
+  //       videoChat.joinChannel(
+  //         tile.privateAreaId,
+  //         this.playApp.uid + this.username,
+  //         this.playApp.realmId
+  //       );
+  //       this.playApp.fadeInTiles(tile.privateAreaId);
+  //     }
+  //   } else {
+  //     if (this.playApp.proximityId) {
+  //       if (this.playApp.proximityId !== this.currentChannel) {
+  //         this.currentChannel = this.playApp.proximityId;
+  //         videoChat.joinChannel(
+  //           this.playApp.proximityId,
+  //           this.playApp.uid + this.username,
+  //           this.playApp.realmId
+  //         );
+  //         this.playApp.fadeOutTiles();
+  //       }
+  //     } else if (this.currentChannel !== "local") {
+  //       this.currentChannel = "local";
+  //       videoChat.leaveChannel();
+  //       this.playApp.fadeOutTiles();
+  //     }
+  //   }
+  // };
   public changeAnimationState = (
     state: AnimationState,
     force: boolean = false
