@@ -197,6 +197,21 @@ export class Player {
     //   server.socket.emit("movePlayer", { x, y });
     // }
   };
+  private stop = () => {
+    PIXI.Ticker.shared.remove(this.move);
+    this.targetPosition = null;
+
+    if (this.isLocal) {
+      this.changeAnimationState(`idle_${this.direction}` as AnimationState);
+    } else {
+      // if player doesnt move for x secs, do idle animation
+      setTimeout(() => {
+        if (!this.targetPosition) {
+          this.changeAnimationState(`idle_${this.direction}` as AnimationState);
+        }
+      }, 100);
+    }
+  };
   private move = ({ deltaTime }: { deltaTime: number }) => {
     if (!this.targetPosition) return;
 
@@ -210,10 +225,9 @@ export class Player {
       x: this.path[this.pathIndex][0],
       y: this.path[this.pathIndex][1],
     };
-
-    if (this.isLocal && this.movementMode === "keyboard") {
-      this.setFrozen(true);
-    }
+    // if (this.isLocal && this.movementMode === "keyboard") {
+    //   this.setFrozen(true);
+    // }
 
     const speed = this.movementSpeed * deltaTime;
 
@@ -224,6 +238,7 @@ export class Player {
     if (distance < speed) {
       this.parent.x = this.targetPosition.x;
       this.parent.y = this.targetPosition.y;
+      console.log("player stopped");
 
       this.pathIndex++;
       if (this.pathIndex < this.path.length) {
@@ -245,6 +260,8 @@ export class Player {
           )
         ) {
           this.moveToTile(newTilePosition.x, newTilePosition.y);
+        } else {
+          this.stop();
         }
       }
     } else {
@@ -326,6 +343,8 @@ export class Player {
   // };
 
   public keydown = (event: KeyboardEvent) => {
+    console.log(this.frozen);
+
     if (this.frozen) return;
 
     this.setMovementMode("keyboard");
@@ -339,6 +358,7 @@ export class Player {
     } else if (event.key === "ArrowRight" || event.key === "d") {
       movementInput.x += 1;
     }
+    console.log("keydown", event.key);
 
     this.moveToTile(
       this.currentTilePosition.x + movementInput.x,

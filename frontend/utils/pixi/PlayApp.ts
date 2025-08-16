@@ -176,6 +176,8 @@ export class PlayApp extends App {
   };
 
   private keyup = (event: KeyboardEvent) => {
+    console.log("keyup", event.key);
+
     this.keysDown = this.keysDown.filter((key) => key !== event.key);
   };
   private fadeOut = () => {
