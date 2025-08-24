@@ -3,6 +3,8 @@ import * as PIXI from "pixi.js";
 import { gsap } from "gsap";
 import { Player } from "./Player/Player";
 import { App } from "./App";
+import signal from "../signal";
+import { server } from "../backend/server";
 export class PlayApp extends App {
   private scale: number = 1.5;
   public player: Player;
@@ -46,8 +48,8 @@ export class PlayApp extends App {
     this.clickEvents();
     this.setUpKeyboardEvents();
     this.setUpFadeOverlay();
-    // this.setUpSignalListeners();
-    // this.setUpSocketEvents();
+    this.setUpSignalListeners();
+    this.setUpSocketEvents();
     this.fadeOut();
   }
   private resizeEvent = () => {
@@ -63,6 +65,24 @@ export class PlayApp extends App {
   private setScale = (newScale: number) => {
     this.scale = newScale;
     this.app.stage.scale.set(this.scale);
+  };
+  private setUpSignalListeners = () => {
+    signal.on("requestSkin", this.onRequestSkin);
+    signal.on("switchSkin", this.onSwitchSkin);
+    signal.on("disableInput", this.onDisableInput);
+    signal.on("message", this.onMessage);
+    signal.on("getSkinForUid", this.getSkinForUid);
+  };
+  private setUpSocketEvents = () => {
+    server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
+    server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
+    server.socket?.on("playerMoved", this.onPlayerMoved);
+    server.socket?.on("playerTeleported", this.onPlayerTeleported);
+    server.socket?.on("playerChangedSkin", this.onPlayerChangedSkin);
+    server.socket?.on("receiveMessage", this.onReceiveMessage);
+    server.socket?.on("disconnect", this.onDisconnect);
+    server.socket?.on("kicked", this.onKicked);
+    server.socket?.on("proximityUpdate", this.onProximityUpdate);
   };
   override async loadRoom(index: number) {
     // Load the room data and initialize the player

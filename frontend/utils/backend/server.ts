@@ -1,5 +1,6 @@
 import io, { Socket } from "socket.io-client";
 import { createClient } from "../supabase/client";
+import { request } from "./request";
 type ConnectionResult = {
   success: boolean;
   errorMessage: string;
@@ -43,35 +44,55 @@ class Server {
 
       this.socket.on("connect", () => {
         this.connected = true;
-        this.socket.emit("joinRealm", {
+        this.socket?.emit("joinRealm", {
           realmId,
           shareId,
         });
+        this.socket?.on("joinedRealm", () => {
+          resolve({
+            success: true,
+            errorMessage: "",
+          });
+        });
 
-        resolve({ success: true, errorMessage: "" });
-      });
+        this.socket?.on("failedToJoinRoom", (reason: string) => {
+          resolve({
+            success: false,
+            errorMessage: reason,
+          });
+        });
 
-      this.socket.on("connect_error", (err) => {
-        console.error("Connection error:", err.message);
-        resolve({ success: false, errorMessage: err.message });
-      });
-
-      this.socket.on("disconnect", (reason) => {
-        console.warn("Disconnected from server:", reason);
-      });
-
-      this.socket.on("reconnect_attempt", (attempt) => {
-        console.log(`Reconnection attempt ${attempt}`);
-      });
-
-      this.socket.on("reconnect_failed", () => {
-        console.error("Reconnection failed");
-        resolve({
-          success: false,
-          errorMessage: "Reconnection failed",
+        this.socket?.on("connect_error", (err: any) => {
+          console.error("Connection error:", err);
+          resolve({
+            success: false,
+            errorMessage: err.message,
+          });
         });
       });
     });
+  }
+  public disconnect() {
+    if (this.connected) {
+      this.connected = false;
+      this.socket?.disconnect();
+    }
+  }
+  public async getPlayersInRoom(roomIndex: number) {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session)
+      return { data: null, error: { message: "No session provided" } };
+
+    return request(
+      "/getPlayersInRoom",
+      {
+        roomIndex: roomIndex,
+      },
+      session.access_token
+    );
   }
 }
 const server = new Server();
