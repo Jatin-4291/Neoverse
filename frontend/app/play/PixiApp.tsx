@@ -4,7 +4,7 @@ import { PlayApp } from "@/utils/pixi/PlayApp";
 import { useEffect } from "react";
 import { RealmData } from "@/utils/pixi/types";
 import { useModal } from "../hooks/useModal";
-// import { server } from "@/utils/backend/server";
+import { server } from "@/utils/backend/server";
 
 type PixiAppProps = {
   className?: string;
@@ -21,18 +21,18 @@ const PixiApp: React.FC<PixiAppProps> = ({
   className,
   mapData,
   username,
-  // access_token,
+  access_token,
   realmId,
   uid,
-  // shareId,
+  shareId,
   initialSkin,
 }) => {
   const appRef = useRef<PlayApp | null>(null);
   const {
     setModal,
     setLoadingText,
-    // setFailedConnectionMessage,
-    // setErrorModal,
+    setFailedConnectionMessage,
+    setErrorModal,
   } = useModal();
 
   useEffect(() => {
@@ -40,18 +40,18 @@ const PixiApp: React.FC<PixiAppProps> = ({
       const app = new PlayApp(uid, realmId, mapData, username, initialSkin);
       appRef.current = app;
       setModal("Loading");
-      // setLoadingText("Connecting to server...");
-      // const { success, errorMessage } = await server.connect(
-      //   realmId,
-      //   uid,
-      //   shareId,
-      //   access_token
-      // );
-      // if (!success) {
-      //   setErrorModal("Failed To Connect");
-      //   setFailedConnectionMessage(errorMessage);
-      //   return;
-      // }
+      setLoadingText("Connecting to server...");
+      const { success, errorMessage } = await server.connect(
+        realmId,
+        uid,
+        shareId,
+        access_token
+      );
+      if (!success) {
+        setErrorModal("Failed To Connect");
+        setFailedConnectionMessage(errorMessage);
+        return;
+      }
 
       setLoadingText("Loading game...");
       await app.init();
