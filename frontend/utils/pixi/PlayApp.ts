@@ -73,6 +73,32 @@ export class PlayApp extends App {
     signal.on("message", this.onMessage);
     signal.on("getSkinForUid", this.getSkinForUid);
   };
+  private removeSignalListeners = () => {
+    signal.off("requestSkin", this.onRequestSkin);
+    signal.off("switchSkin", this.onSwitchSkin);
+    signal.off("disableInput", this.onDisableInput);
+    signal.off("message", this.onMessage);
+    signal.off("getSkinForUid", this.getSkinForUid);
+  };
+  private onRequestSkin = () => {
+    signal.emit("skin", this.player.skin);
+  };
+
+  private onSwitchSkin = (skin: string) => {
+    this.player.changeSkin(skin);
+    server.socket?.emit("changedSkin", skin);
+  };
+
+  private getSkinForUid = (uid: string) => {
+    const player = this.players[uid];
+    if (!player) return;
+
+    signal.emit("video-skin", {
+      skin: player.skin,
+      uid: uid,
+    });
+  };
+
   private setUpSocketEvents = () => {
     server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
     server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
