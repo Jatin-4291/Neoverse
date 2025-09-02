@@ -2,8 +2,7 @@ import express from "express";
 import { Server } from "socket.io";
 import cors from "cors";
 import { createServer } from "http";
-import { supabase } from "./supabase.js";
-import { users } from "./users.js";
+import { socket } from "./socket/socket.js";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

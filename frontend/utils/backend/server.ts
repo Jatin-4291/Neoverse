@@ -49,6 +49,8 @@ class Server {
           shareId,
         });
         this.socket?.on("joinedRealm", () => {
+          console.log("Successfully joined realm");
+
           resolve({
             success: true,
             errorMessage: "",

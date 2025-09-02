@@ -6,10 +6,13 @@ import { getPlayRealmData } from "@/utils/supabase/getPlayRealmData";
 import PlayClient from "../PlayClient";
 import { updateVisitedRealms } from "@/utils/supabase/updateVisitedRealms";
 import { formatEmailToName } from "@/utils/formatEmailToName";
+import { id } from "zod/locales";
 export default async function Play(props: {
   params: { id: string };
   searchParams: { shareId?: string };
 }) {
+  console.log("id", props.params.id, "shareId", props.searchParams.shareId);
+
   const { params, searchParams } = props;
   const supabase = createClient();
   const {
@@ -18,6 +21,7 @@ export default async function Play(props: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  console.log("user", user, "session", session);
 
   if (!session || !user) {
     return redirect("/signin");
@@ -31,14 +35,15 @@ export default async function Play(props: {
         .single()
     : await getPlayRealmData(session.access_token, searchParams?.shareId);
 
-  console.log(user.id);
+  console.log(user, "user");
+
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("skin")
     .eq("id", user.id)
     .single();
   // Show not found page if no data is returned
-  console.log(profile, profileError);
+  console.log(profile, "prfile");
 
   if (!data || !profile) {
     const message = error?.message || profileError?.message;
@@ -50,7 +55,6 @@ export default async function Play(props: {
   const map_data = realm.map_data;
 
   const skin = profile.skin;
-  console.log("skin", skin);
 
   if (searchParams?.shareId && realm.owner_id !== user.id) {
     await updateVisitedRealms(session.access_token, searchParams?.shareId);

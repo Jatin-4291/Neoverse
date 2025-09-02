@@ -2,6 +2,7 @@ class Users {
   users = {};
 
   addUser(id, user) {
+    console.log("Adding user:", id);
     this.users[id] = user;
   }
 
@@ -9,7 +10,7 @@ class Users {
     delete this.users[id];
   }
 
-  getUsers() {
+  getUsers(id) {
     return this.users[id];
   }
 }

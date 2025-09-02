@@ -69,15 +69,15 @@ export class PlayApp extends App {
   private setUpSignalListeners = () => {
     signal.on("requestSkin", this.onRequestSkin);
     signal.on("switchSkin", this.onSwitchSkin);
-    signal.on("disableInput", this.onDisableInput);
-    signal.on("message", this.onMessage);
+    // signal.on("disableInput", this.onDisableInput);
+    // signal.on("message", this.onMessage);
     signal.on("getSkinForUid", this.getSkinForUid);
   };
   private removeSignalListeners = () => {
     signal.off("requestSkin", this.onRequestSkin);
     signal.off("switchSkin", this.onSwitchSkin);
-    signal.off("disableInput", this.onDisableInput);
-    signal.off("message", this.onMessage);
+    // signal.off("disableInput", this.onDisableInput);
+    // signal.off("message", this.onMessage);
     signal.off("getSkinForUid", this.getSkinForUid);
   };
   private onRequestSkin = () => {
@@ -85,7 +85,7 @@ export class PlayApp extends App {
   };
 
   private onSwitchSkin = (skin: string) => {
-    this.player.changeSkin(skin);
+    // this.player.changeSkin(skin);
     server.socket?.emit("changedSkin", skin);
   };
 
@@ -100,15 +100,15 @@ export class PlayApp extends App {
   };
 
   private setUpSocketEvents = () => {
-    server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
-    server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
+    // server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
+    // server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
     server.socket?.on("playerMoved", this.onPlayerMoved);
-    server.socket?.on("playerTeleported", this.onPlayerTeleported);
-    server.socket?.on("playerChangedSkin", this.onPlayerChangedSkin);
-    server.socket?.on("receiveMessage", this.onReceiveMessage);
-    server.socket?.on("disconnect", this.onDisconnect);
-    server.socket?.on("kicked", this.onKicked);
-    server.socket?.on("proximityUpdate", this.onProximityUpdate);
+    // server.socket?.on("playerTeleported", this.onPlayerTeleported);
+    // server.socket?.on("playerChangedSkin", this.onPlayerChangedSkin);
+    // server.socket?.on("receiveMessage", this.onReceiveMessage);
+    // server.socket?.on("disconnect", this.onDisconnect);
+    // server.socket?.on("kicked", this.onKicked);
+    // server.socket?.on("proximityUpdate", this.onProximityUpdate);
   };
   override async loadRoom(index: number) {
     // Load the room data and initialize the player
@@ -247,7 +247,13 @@ export class PlayApp extends App {
     document.removeEventListener("keydown", this.keydown);
     document.removeEventListener("keyup", this.keyup);
   };
-
+  private onPlayerMoved = (data: any) => {
+    if (this.blocked.has(`${data.x}.${data.y}`)) return;
+    const player = this.players[data.uid];
+    if (player) {
+      player.moveToTile(data.x, data.y);
+    }
+  };
   public destroy() {
     this.removeEvents();
     super.destroy();

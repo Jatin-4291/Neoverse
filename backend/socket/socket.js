@@ -1,13 +1,17 @@
 import { Server } from "socket.io";
-import { users } from "../users";
-import { supabase } from "../supabase";
-import { sessionManager } from "../session";
+import { users } from "./users.js";
+import { supabase } from "../supabase.js";
+import { SessionManager } from "../session.js";
+const sessionManager = new SessionManager();
+import { formatEmailToName } from "../utils.js";
+import { use } from "react";
 const protectConnection = (io) => {
   io.use(async (socket, next) => {
     const access_token =
       socket.handshake.headers["authorization"]?.split(" ")[1];
     const uid = socket.handshake.query.uid;
     if (!access_token || !uid) {
+      ``;
       return next(new Error("Unauthorized"));
     } else {
       const { data: user, error: error } = await supabase.auth.getUser(
@@ -36,6 +40,27 @@ export const socket = (io) => {
         callback({ session, data });
       });
     };
+    const emit = (eventName, data) => {
+      const session = sessionManager.getPlayerSession(
+        socket.handshake.query.uid
+      );
+      if (!session) {
+        return;
+      }
+      const room = session.getPlayerRoom(socket.handshake.query.uid);
+      const players = session.getPlayersInRoom(room);
+      for (const player of players) {
+        if (player.socketId === socket.id) {
+          continue;
+        }
+        io.to(player.socketId).emit(eventName, data);
+      }
+    };
+    const emitToSocketIds = (socketIds, eventName, data) => {
+      for (const socketId of socketIds) {
+        io.to(socketId).emit(eventName, data);
+      }
+    };
     socket.on("joinRealm", async (realmData) => {
       const uid = socket.handshake.query.uid;
       const rejectJoin = (reason) => {
@@ -51,11 +76,11 @@ export const socket = (io) => {
       }
       const { data: realm, error } = await supabase
         .from("realms")
-        .select("owner_id", "share_id", "map_data", "only_owner")
+        .select("*")
         .eq("id", realmData.realmId)
         .single();
 
-      if (error || !data) {
+      if (error || !realm) {
         return rejectJoin("Space not found.");
       }
       const { data: profile, error: profileError } = await supabase
@@ -66,9 +91,11 @@ export const socket = (io) => {
       if (profileError) {
         return rejectJoin("Failed to get profile.");
       }
+      console.log("realm", realm, "profile", profile);
+
       const join = async () => {
         if (!sessionManager.getSession(realmData.realmId)) {
-          sessionManager.createSession(realmData.realmId, data.map_data);
+          sessionManager.createSession(realmData.realmId, realm.map_data);
         }
 
         const currentSession = sessionManager.getPlayerSession(uid);
@@ -77,7 +104,9 @@ export const socket = (io) => {
         }
 
         const user = users.getUsers(uid);
-        const username = formatEmailToName(user.user_metadata.email);
+        console.log(user.user.email);
+
+        const username = formatEmailToName(user.user.email);
         sessionManager.addPlayerToSession(
           socket.id,
           realmData.realmId,
@@ -91,7 +120,6 @@ export const socket = (io) => {
         socket.join(realmData.realmId);
         socket.emit("joinedRealm");
         emit("playerJoinedRoom", player);
-        joiningInProgress.delete(uid);
       };
       if (realm.owner_id === socket.handshake.query.uid) {
         return join();
@@ -106,8 +134,17 @@ export const socket = (io) => {
         return rejectJoin("The share link has been changed.");
       }
     });
-    socket.on("disconnect", () => {
-      console.log("User disconnected");
+    socket.on("disconnect", ({ session, data }) => {
+      const uid = socket.handshake.query.uid;
+      const socketIds = session.getSocketIdsInRoom(
+        session.id,
+        session.getPlayerRoom(uid)
+      );
+      const success = sessionManager.logOutBySocketId(socket.id);
+      if (success) {
+        emitToSocketIds(socketIds, "playerLeftRoom", uid);
+        users.removeUser(uid);
+      }
     });
   });
 };
