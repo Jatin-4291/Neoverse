@@ -41,6 +41,8 @@ export const socket = (io) => {
       });
     };
     const emit = (eventName, data) => {
+      console.log("emit to all players in the same room");
+
       const session = sessionManager.getPlayerSession(
         socket.handshake.query.uid
       );
@@ -53,6 +55,8 @@ export const socket = (io) => {
         if (player.socketId === socket.id) {
           continue;
         }
+        console.log(player.socketId, "emitting", eventName, data);
+
         io.to(player.socketId).emit(eventName, data);
       }
     };
@@ -91,9 +95,10 @@ export const socket = (io) => {
       if (profileError) {
         return rejectJoin("Failed to get profile.");
       }
-      console.log("realm", realm, "profile", profile);
 
       const join = async () => {
+        console.log("join called");
+
         if (!sessionManager.getSession(realmData.realmId)) {
           sessionManager.createSession(realmData.realmId, realm.map_data);
         }
@@ -104,7 +109,6 @@ export const socket = (io) => {
         }
 
         const user = users.getUsers(uid);
-        console.log(user.user.email);
 
         const username = formatEmailToName(user.user.email);
         sessionManager.addPlayerToSession(
@@ -121,11 +125,10 @@ export const socket = (io) => {
         socket.emit("joinedRealm");
         emit("playerJoinedRoom", player);
       };
+      console.log(realm.owner_id, "owner_id");
+      console.log(socket.handshake.query.uid, "uid");
       if (realm.owner_id === socket.handshake.query.uid) {
         return join();
-      }
-      if (realm.only_owner) {
-        return rejectJoin("This realm is private right now. Come back later!");
       }
 
       if (realm.share_id === realmData.shareId) {
@@ -134,9 +137,9 @@ export const socket = (io) => {
         return rejectJoin("The share link has been changed.");
       }
     });
-    socket.on("disconnect", ({ session, data }) => {
+    on("disconnect", ({ session, data }) => {
       const uid = socket.handshake.query.uid;
-      const socketIds = session.getSocketIdsInRoom(
+      const socketIds = sessionManager.getSocketIdsInRoom(
         session.id,
         session.getPlayerRoom(uid)
       );

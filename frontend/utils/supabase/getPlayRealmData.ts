@@ -18,7 +18,7 @@ export async function getPlayRealmData(accessToken: string, shareId: string) {
 
   const { data, error } = await supabase
     .from("realms")
-    .select("map_data, owner_id, only_owner, name")
+    .select("*")
     .eq("share_id", shareId)
     .single();
 

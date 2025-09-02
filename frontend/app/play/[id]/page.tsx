@@ -7,13 +7,17 @@ import PlayClient from "../PlayClient";
 import { updateVisitedRealms } from "@/utils/supabase/updateVisitedRealms";
 import { formatEmailToName } from "@/utils/formatEmailToName";
 import { id } from "zod/locales";
-export default async function Play(props: {
-  params: { id: string };
-  searchParams: { shareId?: string };
-}) {
-  console.log("id", props.params.id, "shareId", props.searchParams.shareId);
+import { log } from "node:console";
 
-  const { params, searchParams } = props;
+interface PlayPageProps {
+  params: Promise<{ id: string }>; // <-- Promise type
+  searchParams: Promise<{ shareId?: string }>;
+}
+
+export default async function Play({ params, searchParams }: PlayPageProps) {
+  const { id } = await params; // 👈 await required
+  const { shareId } = await searchParams; // 👈 await required
+
   const supabase = createClient();
   const {
     data: { session },
@@ -26,16 +30,12 @@ export default async function Play(props: {
   if (!session || !user) {
     return redirect("/signin");
   }
-
-  const { data, error } = !searchParams?.shareId
-    ? await supabase
-        .from("realms")
-        .select("map_data, owner_id, name")
-        .eq("id", params.id)
-        .single()
-    : await getPlayRealmData(session.access_token, searchParams?.shareId);
-
-  console.log(user, "user");
+  console.log("id", id);
+  console.log("shareId", shareId);
+  log("access_token", session.access_token);
+  const { data, error } = !shareId
+    ? await supabase.from("realms").select("*").eq("id", id).single()
+    : await getPlayRealmData(session.access_token, shareId);
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -44,6 +44,7 @@ export default async function Play(props: {
     .single();
   // Show not found page if no data is returned
   console.log(profile, "prfile");
+  console.log(data, "data");
 
   if (!data || !profile) {
     const message = error?.message || profileError?.message;
@@ -56,8 +57,8 @@ export default async function Play(props: {
 
   const skin = profile.skin;
 
-  if (searchParams?.shareId && realm.owner_id !== user.id) {
-    await updateVisitedRealms(session.access_token, searchParams?.shareId);
+  if (shareId && realm.owner_id !== user.id) {
+    await updateVisitedRealms(session.access_token, shareId);
   }
 
   return (
@@ -65,9 +66,9 @@ export default async function Play(props: {
       mapData={map_data}
       username={formatEmailToName(user.user_metadata.email)}
       access_token={session.access_token}
-      realmId={params.id}
+      realmId={id}
       uid={user.id}
-      shareId={searchParams?.shareId || ""}
+      shareId={shareId || ""}
       initialSkin={skin}
       name={realm.name}
     />

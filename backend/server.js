@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { createServer } from "http";
 import { socket } from "./socket/socket.js";
+import router from "./routes/routes.js";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -11,6 +12,9 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"],
   },
 });
+app.use(express.json()); // <-- parse JSON bodies
+app.use(express.urlencoded({ extended: true }));
+app.use("/", router);
 socket(io);
 
 const PORT = process.env.PORT || 4500;

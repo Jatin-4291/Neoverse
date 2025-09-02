@@ -5,6 +5,7 @@ import { Player } from "./Player/Player";
 import { App } from "./App";
 import signal from "../signal";
 import { server } from "../backend/server";
+import { log } from "node:console";
 export class PlayApp extends App {
   private scale: number = 1.5;
   public player: Player;
@@ -101,7 +102,7 @@ export class PlayApp extends App {
 
   private setUpSocketEvents = () => {
     // server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
-    // server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
+    server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
     server.socket?.on("playerMoved", this.onPlayerMoved);
     // server.socket?.on("playerTeleported", this.onPlayerTeleported);
     // server.socket?.on("playerChangedSkin", this.onPlayerChangedSkin);
@@ -117,7 +118,7 @@ export class PlayApp extends App {
     this.setUpBlockedTiles();
     this.setUpFadeTiles();
     this.spawnLocalPlayer();
-    // await this.syncOtherPlayers();
+    await this.syncOtherPlayers();
     // this.displayInitialChatMessage();
   }
   private setUpBlockedTiles() {
@@ -146,7 +147,24 @@ export class PlayApp extends App {
     this.fadeOverlay.fill(0x0f0f0f);
     this.app.stage.addChild(this.fadeOverlay);
   };
+  private async syncOtherPlayers() {
+    const { data, error } = await server.getPlayersInRoom(
+      this.currentRoomIndex
+    );
+    console.log(data);
 
+    if (error) {
+      console.error("Failed to get player positions in room:", error);
+      return;
+    }
+
+    for (const player of data.players) {
+      if (player.uid === this.uid) continue;
+      this.updatePlayer(player.uid, player);
+    }
+
+    this.sortObjectsByY();
+  }
   private setUpFadeTiles() {
     this.fadeTiles = {};
     this.fadeTileContainer.removeChildren();
@@ -246,6 +264,42 @@ export class PlayApp extends App {
     // this.removeSignalListeners();
     document.removeEventListener("keydown", this.keydown);
     document.removeEventListener("keyup", this.keyup);
+  };
+  private async spawnPlayer(
+    uid: string,
+    skin: string,
+    username: string,
+    x: number,
+    y: number
+  ) {
+    const otherPlayer = new Player(skin, this, username);
+    await otherPlayer.init();
+    otherPlayer.setPosition(x, y);
+    this.layers.object.addChild(otherPlayer.parent);
+    this.players[uid] = otherPlayer;
+    this.sortObjectsByY();
+  }
+  private async updatePlayer(uid: string, player: any) {
+    if (uid in this.players) {
+      if (
+        this.players[uid].currentTilePosition.x !== player.x ||
+        this.players[uid].currentTilePosition.y !== player.y
+      ) {
+        this.players[uid].setPosition(player.x, player.y);
+      }
+    } else {
+      await this.spawnPlayer(
+        player.uid,
+        player.skin,
+        player.username,
+        player.x,
+        player.y
+      );
+    }
+  }
+  private onPlayerJoinedRoom = (playerData: any) => {
+    console.log("Player joined room:", playerData);
+    this.updatePlayer(playerData.uid, playerData);
   };
   private onPlayerMoved = (data: any) => {
     if (this.blocked.has(`${data.x}.${data.y}`)) return;
