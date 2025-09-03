@@ -6,7 +6,6 @@ import { getPlayRealmData } from "@/utils/supabase/getPlayRealmData";
 import PlayClient from "../PlayClient";
 import { updateVisitedRealms } from "@/utils/supabase/updateVisitedRealms";
 import { formatEmailToName } from "@/utils/formatEmailToName";
-import { id } from "zod/locales";
 import { log } from "node:console";
 
 interface PlayPageProps {

@@ -6,9 +6,14 @@ import { socket } from "./socket/socket.js";
 import router from "./routes/routes.js";
 const app = express();
 const httpServer = createServer(app);
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });

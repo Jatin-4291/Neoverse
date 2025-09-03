@@ -17,7 +17,10 @@ export class SessionManager {
   }
 
   getPlayerSession(uid) {
+    console.log("getPlayerSession:", uid);
     const realmId = this.playerIdToRealmId[uid];
+    console.log("realmId: for getPlayerSession", realmId);
+    console.log("session: for getPlayerSession", this.sessions[realmId]);
     return this.sessions[realmId];
   }
 
@@ -238,5 +241,5 @@ class Session {
     return proximityTiles;
   }
 }
-
+export const sessionManager = new SessionManager();
 export { Session };

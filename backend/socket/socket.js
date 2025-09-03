@@ -1,8 +1,7 @@
 import { Server } from "socket.io";
 import { users } from "./users.js";
 import { supabase } from "../supabase.js";
-import { SessionManager } from "../session.js";
-const sessionManager = new SessionManager();
+import { sessionManager } from "../session.js";
 import { formatEmailToName } from "../utils.js";
 import { use } from "react";
 const protectConnection = (io) => {
@@ -98,17 +97,17 @@ export const socket = (io) => {
 
       const join = async () => {
         console.log("join called");
+        console.log("realmData:", realmData);
+        console.log("uid:", uid);
 
         if (!sessionManager.getSession(realmData.realmId)) {
           sessionManager.createSession(realmData.realmId, realm.map_data);
         }
 
         const currentSession = sessionManager.getPlayerSession(uid);
-        if (currentSession) {
-          kickPlayer(uid, "You have logged in from another location.");
-        }
 
         const user = users.getUsers(uid);
+        console.log("user:", user);
 
         const username = formatEmailToName(user.user.email);
         sessionManager.addPlayerToSession(
