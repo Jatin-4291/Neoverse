@@ -70,7 +70,6 @@ const PixiApp: React.FC<PixiAppProps> = ({
       }
     };
   }, []);
-  console.log(appRef.current);
   return (
     <div id="app-container" className={`overflow-hidden ${className}`}></div>
   );

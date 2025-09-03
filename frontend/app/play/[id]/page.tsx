@@ -24,14 +24,10 @@ export default async function Play({ params, searchParams }: PlayPageProps) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.log("user", user, "session", session);
 
   if (!session || !user) {
     return redirect("/signin");
   }
-  console.log("id", id);
-  console.log("shareId", shareId);
-  log("access_token", session.access_token);
   const { data, error } = !shareId
     ? await supabase.from("realms").select("*").eq("id", id).single()
     : await getPlayRealmData(session.access_token, shareId);
@@ -41,9 +37,6 @@ export default async function Play({ params, searchParams }: PlayPageProps) {
     .select("skin")
     .eq("id", user.id)
     .single();
-  // Show not found page if no data is returned
-  console.log(profile, "prfile");
-  console.log(data, "data");
 
   if (!data || !profile) {
     const message = error?.message || profileError?.message;

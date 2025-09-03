@@ -22,7 +22,6 @@ export default async function App() {
     .from("realms")
     .select("id, name, share_id")
     .eq("owner_id", user.id);
-  console.log("Owned Realms:", ownedRealms, "Error:", error);
   if (ownedRealms) {
     realms.push(...ownedRealms);
   }
@@ -38,8 +37,6 @@ export default async function App() {
     }
   }
   const errorMessage = error?.message || "";
-
-  console.log("Realms:", realms);
 
   return (
     <div>

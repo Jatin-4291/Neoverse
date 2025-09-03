@@ -77,7 +77,6 @@ class Sprites {
   };
 
   private getSpriteSheetData(sheetData: SpriteSheetData) {
-    console.log(sheetData.url);
     const spriteSheetData = {
       frames: {} as any,
       meta: {

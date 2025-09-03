@@ -27,7 +27,6 @@ const protectConnection = (io) => {
 export const socket = (io) => {
   protectConnection(io);
   io.on("connection", (socket) => {
-    console.log("A user connected");
     const on = (eventName, callback) => {
       socket.on(eventName, (data) => {
         const session = sessionManager.getPlayerSession(
@@ -40,8 +39,6 @@ export const socket = (io) => {
       });
     };
     const emit = (eventName, data) => {
-      console.log("emit to all players in the same room");
-
       const session = sessionManager.getPlayerSession(
         socket.handshake.query.uid
       );
@@ -54,8 +51,6 @@ export const socket = (io) => {
         if (player.socketId === socket.id) {
           continue;
         }
-        console.log(player.socketId, "emitting", eventName, data);
-
         io.to(player.socketId).emit(eventName, data);
       }
     };
@@ -96,10 +91,6 @@ export const socket = (io) => {
       }
 
       const join = async () => {
-        console.log("join called");
-        console.log("realmData:", realmData);
-        console.log("uid:", uid);
-
         if (!sessionManager.getSession(realmData.realmId)) {
           sessionManager.createSession(realmData.realmId, realm.map_data);
         }
@@ -107,8 +98,6 @@ export const socket = (io) => {
         const currentSession = sessionManager.getPlayerSession(uid);
 
         const user = users.getUsers(uid);
-        console.log("user:", user);
-
         const username = formatEmailToName(user.user.email);
         sessionManager.addPlayerToSession(
           socket.id,
@@ -124,8 +113,6 @@ export const socket = (io) => {
         socket.emit("joinedRealm");
         emit("playerJoinedRoom", player);
       };
-      console.log(realm.owner_id, "owner_id");
-      console.log(socket.handshake.query.uid, "uid");
       if (realm.owner_id === socket.handshake.query.uid) {
         return join();
       }
@@ -134,6 +121,26 @@ export const socket = (io) => {
         return join();
       } else {
         return rejectJoin("The share link has been changed.");
+      }
+    });
+    on("movePlayer", ({ session, data }) => {
+      console.log("player moved");
+
+      const player = session.getPlayer(socket.handshake.query.uid);
+      const changedPlayers = session.movePlayer(player.uid, data.x, data.y);
+
+      emit("playerMoved", {
+        uid: player.uid,
+        x: player.x,
+        y: player.y,
+      });
+
+      for (const uid of changedPlayers) {
+        const changedPlayerData = session.getPlayer(uid);
+
+        emitToSocketIds([changedPlayerData.socketId], "proximityUpdate", {
+          proximityId: changedPlayerData.proximityId,
+        });
       }
     });
     on("disconnect", ({ session, data }) => {

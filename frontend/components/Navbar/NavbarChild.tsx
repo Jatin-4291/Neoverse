@@ -22,7 +22,7 @@ export const NavbarChild: React.FC<NavbarChildProps> = ({
         {/* Create Space Button - visible on sm and up */}
         <BasicButton
           onClick={() => {
-            console.log("Create Space button clicked");
+            ("Create Space button clicked");
 
             setModal("Create Realm");
           }}

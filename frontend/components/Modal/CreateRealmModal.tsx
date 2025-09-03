@@ -13,13 +13,11 @@ import defaultMap from "@/utils/defaultmap.json";
 
 const CreateRealmModal: React.FC = () => {
   const { modal, setModal } = useModal();
-  console.log(modal);
 
   const [realmName, setRealmName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const [useDefaultMap, setUseDefaultMap] = useState<boolean>(true);
-  console.log("hello");
 
   const router = useRouter();
 

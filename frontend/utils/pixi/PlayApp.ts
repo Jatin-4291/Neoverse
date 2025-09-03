@@ -6,6 +6,7 @@ import { App } from "./App";
 import signal from "../signal";
 import { server } from "../backend/server";
 import { log } from "node:console";
+import { pl } from "zod/locales";
 export class PlayApp extends App {
   private scale: number = 1.5;
   public player: Player;
@@ -151,7 +152,6 @@ export class PlayApp extends App {
     const { data, error } = await server.getPlayersInRoom(
       this.currentRoomIndex
     );
-    console.log(data);
 
     if (error) {
       console.error("Failed to get player positions in room:", error);
@@ -240,8 +240,6 @@ export class PlayApp extends App {
   };
 
   private keyup = (event: KeyboardEvent) => {
-    console.log("keyup", event.key);
-
     this.keysDown = this.keysDown.filter((key) => key !== event.key);
   };
   private fadeOut = () => {
@@ -302,8 +300,9 @@ export class PlayApp extends App {
     this.updatePlayer(playerData.uid, playerData);
   };
   private onPlayerMoved = (data: any) => {
-    if (this.blocked.has(`${data.x}.${data.y}`)) return;
+    if (this.blocked.has(`${data.x}, ${data.y}`)) return;
     const player = this.players[data.uid];
+
     if (player) {
       player.moveToTile(data.x, data.y);
     }

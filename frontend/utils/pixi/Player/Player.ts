@@ -3,6 +3,7 @@ import { PlayApp } from "../PlayApp";
 import { Coordinate, Point, Direction, AnimationState } from "../types";
 import playerSpriteSheetData from "./PlayerSpriteSheetData";
 import { bfs } from "../pathFinding";
+import { server } from "@/utils/backend/server";
 function formatText(message: string, maxLength: number): string {
   message = message.trim();
   const words = message.split(" ");
@@ -193,9 +194,9 @@ export class Player {
     );
     PIXI.Ticker.shared.add(this.move);
 
-    // if (this.isLocal) {
-    //   server.socket.emit("movePlayer", { x, y });
-    // }
+    if (this.isLocal) {
+      server.socket?.emit("movePlayer", { x, y });
+    }
   };
   private stop = () => {
     PIXI.Ticker.shared.remove(this.move);
@@ -238,7 +239,6 @@ export class Player {
     if (distance < speed) {
       this.parent.x = this.targetPosition.x;
       this.parent.y = this.targetPosition.y;
-      console.log("player stopped");
 
       this.pathIndex++;
       if (this.pathIndex < this.path.length) {
@@ -343,8 +343,6 @@ export class Player {
   // };
 
   public keydown = (event: KeyboardEvent) => {
-    console.log(this.frozen);
-
     if (this.frozen) return;
 
     this.setMovementMode("keyboard");
