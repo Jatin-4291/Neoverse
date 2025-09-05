@@ -7,6 +7,7 @@ import React, {
   useMemo,
 } from "react";
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
+import { videoChat } from "@/video-chat/video-chat";
 
 interface VideoChatContextType {
   toggleCamera: () => void;

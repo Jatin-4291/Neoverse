@@ -6,8 +6,6 @@ import { getPlayRealmData } from "@/utils/supabase/getPlayRealmData";
 import PlayClient from "../PlayClient";
 import { updateVisitedRealms } from "@/utils/supabase/updateVisitedRealms";
 import { formatEmailToName } from "@/utils/formatEmailToName";
-import { log } from "node:console";
-
 interface PlayPageProps {
   params: Promise<{ id: string }>; // <-- Promise type
   searchParams: Promise<{ shareId?: string }>;

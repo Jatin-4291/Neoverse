@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from "react";
 import PixiApp from "./PixiApp";
 import { RealmData } from "@/utils/pixi/types";
-import PlayNavbar from "./PlayNavbar";
+// import PlayNavbar from "./PlayNavbar";
 import { useModal } from "../hooks/useModal";
 import signal from "@/utils/signal";
-// import IntroScreen from "./IntroScreen";
+import IntroScreen from "./IntroScreen";
 // import VideoBar from "@/components/VideoChat/VideoBar";
+import { AgoraVideoChatProvider } from "../hooks/useVideoChat";
 type PlayClientProps = {
   mapData: RealmData;
   username: string;
@@ -61,7 +62,7 @@ const PlayClient: React.FC<PlayClientProps> = ({
   }, []);
 
   return (
-    <>
+    <AgoraVideoChatProvider uid={uid}>
       {!showIntroScreen && (
         <div className="relative w-full h-screen flex flex-col-reverse sm:flex-col">
           {/* <VideoBar /> */}
@@ -78,15 +79,15 @@ const PlayClient: React.FC<PlayClientProps> = ({
           {/* <PlayNavbar username={username} skin={skin} />   */}
         </div>
       )}
-      {/* {showIntroScreen && (
+      {showIntroScreen && (
         <IntroScreen
           realmName={name}
           skin={skin}
           username={username}
           setShowIntroScreen={setShowIntroScreen}
         />
-      )} */}
-    </>
+      )}
+    </AgoraVideoChatProvider>
   );
 };
 export default PlayClient;
