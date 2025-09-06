@@ -18,30 +18,46 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
   username,
   setShowIntroScreen,
 }) => {
-  const src = "/sprites/characters/Character_" + skin + ".png";
+  console.log(skin);
+
+  const src = "/sprites/characters/Character_009.png";
 
   return (
-    <main className="dark-gradient w-full h-screen flex flex-col items-center pt-28">
-      <h1 className="text-4xl font-semibold">
-        Welcome to <span className="text-[#CAD8FF]">{realmName}</span>
+    <main
+      className="w-full h-screen flex flex-col items-center pt-28 
+  bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] text-white"
+    >
+      <h1 className="text-5xl font-bold tracking-wide drop-shadow-md">
+        Welcome to <span className="text-[#60a5fa]">{realmName}</span>
       </h1>
-      <section className="flex flex-row mt-32 items-center gap-24">
-        <div className="flex flex-col items-center gap-4">
-          <div className="aspect-video w-[337px] h-[227px] bg-black rounded-xl border-2 border-[#3F4776] overflow-hidden">
+
+      <section className="flex flex-row mt-32 items-center gap-28">
+        {/* Local Video */}
+        <div className="flex flex-col items-center gap-6">
+          <div
+            className="aspect-video w-[360px] h-[240px] 
+        rounded-2xl overflow-hidden 
+        bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
+          >
             <LocalVideo />
           </div>
           <MicAndCameraButtons />
         </div>
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex flex-row items-center">
+
+        {/* Avatar + Join */}
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-row items-center gap-4">
             <AnimatedCharacter src={src} noAnimation />
-            <p className="relative top-4">{username}</p>
+            <p className="text-lg text-gray-300 font-medium">{username}</p>
           </div>
+
           <BasicButton
-            className="py-0 px-32 w-[250px]"
+            className="py-3 px-16 w-[260px] text-lg font-semibold 
+        bg-gradient-to-r from-indigo-500 to-blue-600 
+        hover:scale-105 transition-all duration-200 rounded-2xl shadow-lg"
             onClick={() => setShowIntroScreen(false)}
           >
-            Join
+            Join Realm
           </BasicButton>
         </div>
       </section>
@@ -55,16 +71,30 @@ function LocalVideo() {
   const { isCameraMuted, isMicMuted } = useVideoChat();
 
   return (
-    <div className="w-full h-full bg-[#111111] grid place-items-center relative">
+    <div className="w-full h-full bg-[#0f172a] grid place-items-center relative">
       <div id="local-video" className="w-full h-full"></div>
-      <div className="absolute select-none text-sm text-white items-center flex flex-col gap-1">
-        {isMicMuted && isCameraMuted && <p>You are muted</p>}
-        {isCameraMuted && <p>Your camera is off</p>}
+
+      {/* Overlay messages */}
+      <div className="absolute select-none text-sm text-gray-200 flex flex-col gap-1 items-center">
+        {isMicMuted && isCameraMuted && (
+          <span className="px-3 py-1 rounded-full bg-black/60 text-xs">
+            You are muted
+          </span>
+        )}
+        {isCameraMuted && (
+          <span className="px-3 py-1 rounded-full bg-black/60 text-xs">
+            Camera off
+          </span>
+        )}
       </div>
+
       {isMicMuted && !isCameraMuted && (
-        <p className="absolute bottom-2 right-3 select-none text-sm text-white bg-black bg-opacity-50 p-1 px-2 rounded-full">
+        <span
+          className="absolute bottom-3 right-3 select-none text-xs text-gray-100 
+          bg-black/70 px-3 py-1 rounded-full"
+        >
           You are muted
-        </p>
+        </span>
       )}
     </div>
   );

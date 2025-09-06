@@ -31,7 +31,7 @@ const PlayClient: React.FC<PlayClientProps> = ({
 }) => {
   const { setErrorModal, setDisconnectedMessage } = useModal();
 
-  const [showIntroScreen, setShowIntroScreen] = useState(false);
+  const [showIntroScreen, setShowIntroScreen] = useState(true);
 
   const [skin, setSkin] = useState(initialSkin);
 
