@@ -4,6 +4,7 @@ import { Coordinate, Point, Direction, AnimationState } from "../types";
 import playerSpriteSheetData from "./PlayerSpriteSheetData";
 import { bfs } from "../pathFinding";
 import { server } from "@/utils/backend/server";
+import { videoChat } from "@/video-chat/video-chat";
 function formatText(message: string, maxLength: number): string {
   message = message.trim();
   const words = message.split(" ");
@@ -220,7 +221,7 @@ export class Player {
       this.parent.x,
       this.parent.y
     );
-    // this.checkIfShouldJoinChannel(currentPos);
+    this.checkIfShouldJoinChannel(currentPos);
 
     this.currentTilePosition = {
       x: this.path[this.pathIndex][0],
@@ -374,41 +375,41 @@ export class Player {
   public destroy() {
     PIXI.Ticker.shared.remove(this.move);
   }
-  // public checkIfShouldJoinChannel = (newTilePosition: Point) => {
-  //   if (!this.isLocal) return;
+  public checkIfShouldJoinChannel = (newTilePosition: Point) => {
+    if (!this.isLocal) return;
 
-  //   const tile =
-  //     this.playApp.realmData.rooms[this.playApp.currentRoomIndex].tilemap[
-  //       `${newTilePosition.x}, ${newTilePosition.y}`
-  //     ];
-  //   if (tile && tile.privateAreaId) {
-  //     if (tile.privateAreaId !== this.currentChannel) {
-  //       this.currentChannel = tile.privateAreaId;
-  //       videoChat.joinChannel(
-  //         tile.privateAreaId,
-  //         this.playApp.uid + this.username,
-  //         this.playApp.realmId
-  //       );
-  //       this.playApp.fadeInTiles(tile.privateAreaId);
-  //     }
-  //   } else {
-  //     if (this.playApp.proximityId) {
-  //       if (this.playApp.proximityId !== this.currentChannel) {
-  //         this.currentChannel = this.playApp.proximityId;
-  //         videoChat.joinChannel(
-  //           this.playApp.proximityId,
-  //           this.playApp.uid + this.username,
-  //           this.playApp.realmId
-  //         );
-  //         this.playApp.fadeOutTiles();
-  //       }
-  //     } else if (this.currentChannel !== "local") {
-  //       this.currentChannel = "local";
-  //       videoChat.leaveChannel();
-  //       this.playApp.fadeOutTiles();
-  //     }
-  //   }
-  // };
+    const tile =
+      this.playApp.realmData.rooms[this.playApp.currentRoomIndex].tilemap[
+        `${newTilePosition.x}, ${newTilePosition.y}`
+      ];
+    if (tile && tile.privateAreaId) {
+      if (tile.privateAreaId !== this.currentChannel) {
+        this.currentChannel = tile.privateAreaId;
+        videoChat.joinChannel(
+          tile.privateAreaId,
+          this.playApp.uid + this.username,
+          this.playApp.realmId
+        );
+        // this.playApp.fadeInTiles(tile.privateAreaId);
+      }
+    } else {
+      if (this.playApp.proximityId) {
+        if (this.playApp.proximityId !== this.currentChannel) {
+          this.currentChannel = this.playApp.proximityId;
+          videoChat.joinChannel(
+            this.playApp.proximityId,
+            this.playApp.uid + this.username,
+            this.playApp.realmId
+          );
+          // this.playApp.fadeOutTiles();
+        }
+      } else if (this.currentChannel !== "local") {
+        this.currentChannel = "local";
+        videoChat.leaveChannel();
+        // this.playApp.fadeOutTiles();
+      }
+    }
+  };
   public changeAnimationState = (
     state: AnimationState,
     force: boolean = false

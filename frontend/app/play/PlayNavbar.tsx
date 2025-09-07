@@ -1,27 +1,23 @@
 import React from "react";
-import { TShirt } from "@phosphor-icons/react";
-import { useModal } from "../hooks/useModal";
-import signal from "@/utils/signal";
 import { ArrowLeftEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import MicAndCameraButtons from "@/components/VideoChat/MicAndCameraButtons";
 import { useVideoChat } from "../hooks/useVideoChat";
 import AnimatedCharacter from "./SkinMenu/AnimatedCharacter";
 import { useEffect } from "react";
-import { videoChat } from "@/utils/video-chat/video-chat";
 
+import { videoChat } from "@/video-chat/video-chat";
 type PlayNavbarProps = {
   username: string;
   skin: string;
 };
 
 const PlayNavbar: React.FC<PlayNavbarProps> = ({ username, skin }) => {
-  const { setModal } = useModal();
   const { isCameraMuted } = useVideoChat();
-  function onClickSkinButton() {
-    setModal("Skin");
-    signal.emit("requestSkin");
-  }
+  // function onClickSkinButton() {
+  //   setModal("Skin");
+  //   signal.emit("requestSkin");
+  // }
 
   useEffect(() => {
     videoChat.playVideoTrackAtElementId("local-video");
@@ -55,12 +51,12 @@ const PlayNavbar: React.FC<PlayNavbarProps> = ({ username, skin }) => {
         </div>
       </div>
       <MicAndCameraButtons />
-      <button
+      {/* <button
         className="aspect-square grid place-items-center rounded-lg p-1 outline-none bg-secondary hover:bg-light-secondary ml-auto animate-colors"
         onClick={onClickSkinButton}
       >
         <TShirt className="h-8 w-8" />
-      </button>
+      </button> */}
     </div>
   );
 };

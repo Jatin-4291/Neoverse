@@ -5,8 +5,6 @@ import { Player } from "./Player/Player";
 import { App } from "./App";
 import signal from "../signal";
 import { server } from "../backend/server";
-import { log } from "node:console";
-import { pl } from "zod/locales";
 export class PlayApp extends App {
   private scale: number = 1.5;
   public player: Player;
@@ -102,7 +100,7 @@ export class PlayApp extends App {
   };
 
   private setUpSocketEvents = () => {
-    // server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
+    server.socket?.on("playerLeftRoom", this.onPlayerLeftRoom);
     server.socket?.on("playerJoinedRoom", this.onPlayerJoinedRoom);
     server.socket?.on("playerMoved", this.onPlayerMoved);
     // server.socket?.on("playerTeleported", this.onPlayerTeleported);
@@ -110,7 +108,22 @@ export class PlayApp extends App {
     // server.socket?.on("receiveMessage", this.onReceiveMessage);
     // server.socket?.on("disconnect", this.onDisconnect);
     // server.socket?.on("kicked", this.onKicked);
-    // server.socket?.on("proximityUpdate", this.onProximityUpdate);
+    server.socket?.on("proximityUpdate", this.onProximityUpdate);
+  };
+  private onProximityUpdate = (data: any) => {
+    this.proximityId = data.proximityId;
+    console.log(this.proximityId);
+
+    if (this.proximityId) {
+      this.player.checkIfShouldJoinChannel(this.player.currentTilePosition);
+    }
+  };
+  private onPlayerLeftRoom = (uid: string) => {
+    if (this.players[uid]) {
+      this.players[uid].destroy();
+      this.layers.object.removeChild(this.players[uid].parent);
+      delete this.players[uid];
+    }
   };
   override async loadRoom(index: number) {
     // Load the room data and initialize the player
