@@ -1,9 +1,8 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export const createClient = async () => {
-  // Await the cookies if it's a promise
-  const cookieStore = await cookies();
+export const createClient = () => {
+  const cookieStore = cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,31 +12,24 @@ export const createClient = async () => {
         get(name: string) {
           return cookieStore.get(name)?.value ?? null;
         },
-        set(name: string, value: string, options: CookieOptions = {}) {
+        set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({
-              name,
-              value,
-              path: options.path ?? "/",
-              httpOnly: options.httpOnly,
-              secure: options.secure,
-              sameSite: options.sameSite,
-              maxAge: options.maxAge,
-            });
+            cookieStore.set({ name, value, ...options });
           } catch (error) {
-            console.log("Cookie set error:", error);
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+            console.log(error);
           }
         },
-        remove(name: string, options: CookieOptions = {}) {
+        remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({
-              name,
-              value: "",
-              path: options.path ?? "/",
-              maxAge: 0,
-            });
+            cookieStore.set({ name, value: "", ...options });
           } catch (error) {
-            console.log("Cookie remove error:", error);
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+            console.log(error);
           }
         },
       },

@@ -5,7 +5,7 @@ import GoogleSignInButton from "./GoogleSignInButton";
 export default function Login() {
   const signInWithGoogle = async () => {
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const {} = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: process.env.NEXT_PUBLIC_BASE_URL + "/auth/callback",

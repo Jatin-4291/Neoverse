@@ -9,7 +9,6 @@ import { useModal } from "@/app/hooks/useModal";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import Image from "next/image";
-
 type DesktopRealmItemProps = {
   name: string;
   id: string;
@@ -86,8 +85,7 @@ const DesktopRealmItem: React.FC<DesktopRealmItemProps> = ({
             alt="Thumbnail"
             className="absolute z-10"
             style={{ imageRendering: "pixelated" }}
-            width={64} // required, set your actual width
-            height={64} // required, set your actual height
+            fill
             priority // optional, if you want it to preload for LCP
           />
           {/* Hover effect and sign-in icon */}

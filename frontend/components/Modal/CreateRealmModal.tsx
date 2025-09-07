@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import Modal from "./Modal";
@@ -6,7 +7,6 @@ import BasicButton from "../BasicButton";
 import BasicInput from "../BasicInput";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import revalidate from "@/utils/revalidate";
 import { removeExtraSpaces } from "@/utils/removeExtraSpaces";
 import defaultMap from "@/utils/defaultmap.json";
@@ -18,8 +18,6 @@ const CreateRealmModal: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [useDefaultMap, setUseDefaultMap] = useState<boolean>(true);
-
-  const router = useRouter();
 
   async function createRealm() {
     const supabase = createClient();
@@ -57,7 +55,6 @@ const CreateRealmModal: React.FC = () => {
       revalidate("/app");
       setModal("None");
       toast.success("Your space has been created!");
-      // router.push(`/editor/${data[0].id}`);
     }
 
     setLoading(false);

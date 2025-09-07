@@ -16,7 +16,7 @@ const Modal: React.FC<ModalProps> = ({
   open,
   closeOnOutsideClick,
 }) => {
-  const { modal, setModal } = useModal();
+  const { setModal } = useModal();
 
   return (
     <Transition.Root show={open} as={Fragment}>
