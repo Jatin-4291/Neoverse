@@ -6,15 +6,21 @@ import { socket } from "./socket/socket.js";
 import router from "./routes/routes.js";
 const app = express();
 const httpServer = createServer(app);
+import dotenv from "dotenv";
+dotenv.config();
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: FRONTEND_URL,
+    credentials: true,
   })
 );
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: FRONTEND_URL,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 app.use(express.json()); // <-- parse JSON bodies
