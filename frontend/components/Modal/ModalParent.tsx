@@ -7,7 +7,6 @@ import DeleteRoomModal from "./DeleteRoomModal";
 import TeleportModal from "./TeleportModal";
 import DeleteRealmModal from "./DeleteRealmModal";
 import FailedToConnectModal from "./FailedToConnectModal";
-import SkinMenu from "@/app/play/SkinMenu/SkinMenu";
 import DisconnectedModal from "./DisconnectedModal";
 import { useModal } from "@/app/hooks/useModal";
 
@@ -24,7 +23,6 @@ const ModalParent: React.FC = () => {
           <DeleteRoomModal />
           <TeleportModal />
           <DeleteRealmModal />
-          <SkinMenu />
         </>
       )}
       <FailedToConnectModal />
