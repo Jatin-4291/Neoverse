@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { grasslandsSpriteSheetData } from "./grasslands";
 import { villageSpriteSheetData } from "./village";
 import { groundSpriteSheetData } from "./ground";

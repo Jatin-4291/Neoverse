@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+
 import BasicButton from "@/components/BasicButton";
 import DesktopRealmItem from "./DesktopRealmItem";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import revalidate from "@/utils/revalidate";
 import { request } from "@/utils/backend/request";
@@ -17,87 +18,135 @@ type Realm = {
 
 type RealmsMenuProps = {
   realms: Realm[];
+  visitedRealms: Realm[];
   errorMessage: string;
 };
 
-const RealmsMenu: React.FC<RealmsMenuProps> = ({ realms, errorMessage }) => {
+const RealmsMenu: React.FC<RealmsMenuProps> = ({
+  visitedRealms,
+  realms,
+  errorMessage,
+}) => {
   const [selectedRealm, setSelectedRealm] = useState<Realm | null>(null);
   const [playerCounts, setPlayerCounts] = useState<number[]>([]);
   const router = useRouter();
   const supabase = createClient();
 
+  /** Show error toast if errorMessage is passed */
   useEffect(() => {
-    if (errorMessage) {
-      toast.error(errorMessage);
-    }
+    if (errorMessage) toast.error(errorMessage);
   }, [errorMessage]);
 
+  /** Fetch player counts on mount + trigger revalidation */
   useEffect(() => {
-    getPlayerCounts();
+    fetchPlayerCounts();
     revalidate("/play/[id]");
   }, []);
 
-  function getLink() {
-    if (selectedRealm?.share_id) {
-      return `/play/${selectedRealm.id}?shareId=${selectedRealm.share_id}`;
-    } else {
-      return `/play/${selectedRealm?.id}`;
-    }
-  }
+  const getLink = () =>
+    selectedRealm
+      ? `/play/${selectedRealm.id}${
+          selectedRealm.share_id ? `?shareId=${selectedRealm.share_id}` : ""
+        }`
+      : "#";
 
-  async function getPlayerCounts() {
-    // get session
+  /** Fetch player counts for all realms */
+  async function fetchPlayerCounts() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
     if (!session) return;
-    const { data: playerCountData, error: playerCountsError } = await request(
+
+    const { data, error } = await request(
       "/getPlayerCounts",
-      { realmIds: realms.map((realm: any) => realm.id) },
+      { realmIds: realms.map((realm) => realm.id) },
       session.access_token
     );
 
-    if (playerCountData) {
-      setPlayerCounts(playerCountData.playerCounts);
-    }
+    if (data) setPlayerCounts(data.playerCounts);
+    if (error) toast.error("Failed to load player counts.");
   }
+
+  /** Reusable component for rendering mobile buttons */
+  const RealmButton: React.FC<{ realm: Realm; count?: number }> = ({
+    realm,
+    count,
+  }) => (
+    <BasicButton
+      key={realm.id}
+      className={`w-full h-12px-4 py-3 rounded-xl flex items-center justify-between 
+        transition-all duration-200 shadow-sm
+        ${
+          selectedRealm?.id === realm.id
+            ? "border-2 border-blue-400 bg-slate-800/80"
+            : "border border-slate-600 bg-slate-900/60 hover:bg-slate-800/70"
+        }`}
+      onClick={() => setSelectedRealm(realm)}
+    >
+      <p className="text-base font-medium text-white">{realm.name}</p>
+      {count !== undefined && (
+        <div
+          className="rounded-full w-9 h-9 flex items-center justify-center 
+          font-bold text-sm bg-green-500/90 text-white shadow-md"
+        >
+          {count}
+        </div>
+      )}
+    </BasicButton>
+  );
 
   return (
     <>
-      {/* Mobile View */}
+      {/* -------------------- Mobile View -------------------- */}
       <div className="flex flex-col items-center p-4 gap-2 sm:hidden">
-        {realms.length === 0 && (
-          <p className="text-center">
-            You have no spaces you can join. Create one on desktop to get
+        {realms.length === 0 ? (
+          <p className="text-center text-slate-400">
+            You have no spaces to join. Create a space on Desktop to get
             started!
           </p>
+        ) : (
+          <div className="w-full">
+            <p className="text-center font-semibold text-slate-100 mb-2">
+              Owned Spaces
+            </p>
+            {realms.map((realm, i) => (
+              <RealmButton
+                key={realm.id}
+                realm={realm}
+                count={playerCounts[i]}
+              />
+            ))}
+          </div>
         )}
-        {realms.map((realm, index) => {
-          function selectRealm() {
-            setSelectedRealm(realm);
-          }
 
-          return (
-            <BasicButton
-              key={realm.id}
-              className={`w-full h-12 border-4 border-transparent flex flex-row items-center justify-between ${
-                selectedRealm?.id === realm.id ? "border-white" : ""
-              }`}
-              onClick={selectRealm}
-            >
-              <p className="text-button text-xl text-left">{realm.name}</p>
-              {playerCounts[index] !== undefined && (
-                <div className="rounded-full grid place-items-center w-8 h-8 font-bold bg-green-500">
-                  {playerCounts[index]}
-                </div>
-              )}
-            </BasicButton>
-          );
-        })}
-        <div className="fixed bottom-0 w-full bg-primary grid place-items-center p-2">
+        {visitedRealms.length > 0 && (
+          <div className="w-full mt-4">
+            <p className="text-center font-semibold text-slate-100 mb-2">
+              Shared Spaces
+            </p>
+            {visitedRealms.map((realm, i) => (
+              <RealmButton
+                key={realm.id}
+                realm={realm}
+                count={playerCounts[i]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Sticky bottom bar */}
+        <div
+          className="fixed bottom-0 w-full 
+    backdrop-blur-md bg-slate-900/85 
+    border-t border-slate-700 shadow-inner 
+    grid place-items-center p-3"
+        >
           <BasicButton
-            className="w-[90%] text-xl px-0 py-0"
-            disabled={selectedRealm === null}
+            className="w-[90%] text-base py-3 rounded-xl 
+      bg-indigo-600 hover:bg-indigo-700 
+      transition-all shadow-md font-semibold text-white"
+            disabled={!selectedRealm}
             onClick={() => router.push(getLink())}
           >
             Join Space
@@ -105,27 +154,63 @@ const RealmsMenu: React.FC<RealmsMenuProps> = ({ realms, errorMessage }) => {
         </div>
       </div>
 
-      {/* Desktop View */}
-      <div className="flex-col items-center w-full p-8 hidden sm:flex">
+      {/* -------------------- Desktop View -------------------- */}
+      <div className="flex-col items-center w-full p-8 hidden sm:flex ">
         {realms.length === 0 && (
-          <p className="text-center">
-            You have no spaces you can join. Create a space to get started!
+          <p className="text-center text-slate-400">
+            You have no owned spaces. Create one to get started!
           </p>
         )}
-        <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 gap-8 w-full">
-          {realms.map((realm, index) => {
-            return (
+
+        {realms.length > 0 && (
+          <p className="mb-4 text-base font-semibold text-slate-100">
+            Owned Spaces
+          </p>
+        )}
+        <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
+          {realms.map((realm, i) => (
+            <div
+              key={realm.id}
+              className="rounded-xl p-4 bg-slate-800/80 border border-slate-700 
+        shadow-md hover:shadow-lg hover:scale-[1.02] 
+        transition-transform duration-200"
+            >
               <DesktopRealmItem
-                key={realm.id}
                 name={realm.name}
                 id={realm.id}
                 shareId={realm.share_id}
                 shared={realm.shared}
-                playerCount={playerCounts[index]}
+                playerCount={playerCounts[i]}
               />
-            );
-          })}
+            </div>
+          ))}
         </div>
+
+        {visitedRealms.length > 0 && (
+          <>
+            <p className="mt-12 mb-4 text-lg font-semibold text-slate-100">
+              Shared Spaces
+            </p>
+            <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
+              {visitedRealms.map((realm, i) => (
+                <div
+                  key={realm.id}
+                  className="rounded-xl p-4 bg-slate-800/80 border border-slate-700 
+            shadow-md hover:shadow-lg hover:scale-[1.02] 
+            transition-transform duration-200"
+                >
+                  <DesktopRealmItem
+                    name={realm.name}
+                    id={realm.id}
+                    shareId={realm.share_id}
+                    shared={realm.shared}
+                    playerCount={playerCounts[i]}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </>
   );

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useModal } from "@/app/hooks/useModal";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 type DesktopRealmItemProps = {
   name: string;
@@ -78,21 +79,23 @@ const DesktopRealmItem: React.FC<DesktopRealmItemProps> = ({
         <div className="w-full aspect-video relative rounded-3xl border-4 border-transparent hover:border-light-secondary overflow-hidden">
           {/* Background pulse animation */}
           <div className="animate-pulse bg-secondary absolute inset-0" />
-
           {/* Thumbnail image */}
-          <img
+
+          <Image
             src="/thumbnail.png"
+            alt="Thumbnail"
             className="absolute z-10"
             style={{ imageRendering: "pixelated" }}
+            width={64} // required, set your actual width
+            height={64} // required, set your actual height
+            priority // optional, if you want it to preload for LCP
           />
-
           {/* Hover effect and sign-in icon */}
           <div className="absolute inset-0 grid place-items-center z-20 opacity-0 hover:opacity-100 transition-opacity duration-300">
             <div className="rounded-full bg-black bg-opacity-70 grid place-items-center absolute p-2">
               <SignIn className="w-8 h-8" />
             </div>
           </div>
-
           {/* Player count indicator */}
           {playerCount != null && (
             <div className="pointer-events-none absolute top-2 left-2 rounded-full px-2 py-1 flex items-center gap-2 bg-black bg-opacity-80 max-w-max z-30">

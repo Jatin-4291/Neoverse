@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as PIXI from "pixi.js";
 import { PlayApp } from "../PlayApp";
 import { Coordinate, Point, Direction, AnimationState } from "../types";

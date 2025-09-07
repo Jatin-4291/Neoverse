@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { TilePoint, Point, RealmData, SpriteMap } from "./types";
 import * as PIXI from "pixi.js";
 import { gsap } from "gsap";

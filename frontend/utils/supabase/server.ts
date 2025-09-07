@@ -10,7 +10,7 @@ export const createClient = () => {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value;
+          return cookieStore.get(name)?.value ?? null;
         },
         set(name: string, value: string, options: CookieOptions) {
           try {

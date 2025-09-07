@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import React from "react";
 import {
-  VideoCameraSlash,
-  MicrophoneSlash,
-  VideoCamera,
-  Microphone,
+  VideoCameraSlashIcon,
+  MicrophoneSlashIcon,
+  VideoCameraIcon,
+  MicrophoneIcon,
 } from "@phosphor-icons/react";
 import { useVideoChat } from "@/app/hooks/useVideoChat";
 
@@ -31,9 +32,9 @@ const MicAndCameraButtons: React.FC<MicAndCameraButtonsProps> = () => {
         onClick={toggleMicrophone}
       >
         {isMicMuted ? (
-          <MicrophoneSlash className={micClass} />
+          <MicrophoneSlashIcon className={micClass} />
         ) : (
-          <Microphone className={micClass} />
+          <MicrophoneIcon className={micClass} />
         )}
       </button>
       <button
@@ -46,9 +47,9 @@ const MicAndCameraButtons: React.FC<MicAndCameraButtonsProps> = () => {
         onClick={toggleCamera}
       >
         {isCameraMuted ? (
-          <VideoCameraSlash className={cameraClass} />
+          <VideoCameraSlashIcon className={cameraClass} />
         ) : (
-          <VideoCamera className={cameraClass} />
+          <VideoCameraIcon className={cameraClass} />
         )}
       </button>
     </section>

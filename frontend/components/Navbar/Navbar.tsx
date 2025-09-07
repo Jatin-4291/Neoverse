@@ -2,7 +2,6 @@ import React from "react";
 import { createClient } from "@/utils/supabase/server";
 import { NavbarChild } from "./NavbarChild";
 import { formatEmailToName } from "@/utils/formatEmailToName";
-import { log } from "console";
 export const Navbar: React.FC = async () => {
   const supabase = createClient();
 

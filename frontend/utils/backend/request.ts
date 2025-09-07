@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export async function request(
   url: string,
   params: Record<string, any> = {},

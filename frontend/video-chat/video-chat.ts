@@ -3,7 +3,6 @@ import AgoraRTC, {
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
   IAgoraRTCRemoteUser,
-  IDataChannelConfig,
 } from "agora-rtc-sdk-ng";
 import { createHash } from "crypto";
 import signal from "../utils/signal";
@@ -42,8 +41,8 @@ export class VideoChat {
 
   public onUserPublished = async (
     user: IAgoraRTCRemoteUser,
-    mediaType: "audio" | "video" | "datachannel",
-    config?: IDataChannelConfig
+    mediaType: "audio" | "video" | "datachannel"
+    // config?: IDataChannelConfig
   ) => {
     this.remoteUsers[user.uid] = user;
     await this.client.subscribe(user, mediaType);
@@ -66,7 +65,7 @@ export class VideoChat {
     }
   };
 
-  public onUserLeft = (user: IAgoraRTCRemoteUser, reason: string) => {
+  public onUserLeft = (user: IAgoraRTCRemoteUser) => {
     delete this.remoteUsers[user.uid];
     signal.emit("user-left", user);
   };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
@@ -34,7 +35,7 @@ export async function getVisitedRealms(access_token: string) {
   const realmsToRemove: string[] = [];
 
   for (const shareId of realmList) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("realms")
       .select("id, name, share_id")
       .eq("share_id", shareId)

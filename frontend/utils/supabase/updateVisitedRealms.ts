@@ -13,15 +13,13 @@ export async function updateVisitedRealms(
   );
 
   // get user data
-  const { data: user, error: userError } = await supabase.auth.getUser(
-    accessToken
-  );
+  const { data: user } = await supabase.auth.getUser(accessToken);
   if (!user || !user.user) {
     return;
   }
 
   // get profile
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("visited_realms")
     .eq("id", user.user.id)
