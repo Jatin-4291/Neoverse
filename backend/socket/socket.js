@@ -1,9 +1,7 @@
-import { Server } from "socket.io";
 import { users } from "./users.js";
 import { supabase } from "../supabase.js";
 import { sessionManager } from "../session.js";
 import { formatEmailToName } from "../utils.js";
-import { use } from "react";
 const protectConnection = (io) => {
   io.use(async (socket, next) => {
     const access_token =

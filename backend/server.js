@@ -10,6 +10,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+console.log(process.env.FRONTEND_URL);
+
 app.use(
   cors({
     origin: FRONTEND_URL,
