@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import RealmsMenu from "./RealmsMenu/RealmsMenu";
 import { getVisitedRealms } from "@/utils/supabase/getVisitedRealms";
 export default async function App() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -38,20 +38,7 @@ const RealmsMenu: React.FC<RealmsMenuProps> = ({
   }, [errorMessage]);
 
   /** Fetch player counts on mount + trigger revalidation */
-  useEffect(() => {
-    fetchPlayerCounts();
-    revalidate("/play/[id]");
-  }, []);
-
-  const getLink = () =>
-    selectedRealm
-      ? `/play/${selectedRealm.id}${
-          selectedRealm.share_id ? `?shareId=${selectedRealm.share_id}` : ""
-        }`
-      : "#";
-
-  /** Fetch player counts for all realms */
-  async function fetchPlayerCounts() {
+  const fetchPlayerCounts = useCallback(async () => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -66,7 +53,21 @@ const RealmsMenu: React.FC<RealmsMenuProps> = ({
 
     if (data) setPlayerCounts(data.playerCounts);
     if (error) toast.error("Failed to load player counts.");
-  }
+  }, [realms, supabase]);
+
+  useEffect(() => {
+    fetchPlayerCounts();
+    revalidate("/play/[id]");
+  }, [fetchPlayerCounts]);
+
+  const getLink = () =>
+    selectedRealm
+      ? `/play/${selectedRealm.id}${
+          selectedRealm.share_id ? `?shareId=${selectedRealm.share_id}` : ""
+        }`
+      : "#";
+
+  /** Fetch player counts for all realms */
 
   /** Reusable component for rendering mobile buttons */
   const RealmButton: React.FC<{ realm: Realm; count?: number }> = ({

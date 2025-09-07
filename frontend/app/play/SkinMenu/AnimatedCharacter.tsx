@@ -1,5 +1,5 @@
 import React from "react";
-
+import Image from "next/image";
 type AnimatedCharacterProps = {
   src: string;
   className?: string;
@@ -18,10 +18,12 @@ const AnimatedCharacter: React.FC<AnimatedCharacterProps> = ({
           noAnimation ? "static-character-container" : "character-container"
         }
       >
-        <img
+        <Image
           src={src}
+          alt="character"
           style={{ imageRendering: "pixelated" }}
           className={noAnimation ? "static-character" : "character"}
+          fill
         />
       </div>
     </div>

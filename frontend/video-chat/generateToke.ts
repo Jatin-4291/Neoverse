@@ -3,7 +3,7 @@ import { RtcRole, RtcTokenBuilder } from "agora-token";
 import { createClient } from "../utils/supabase/server";
 
 export async function generateToken(channelName: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

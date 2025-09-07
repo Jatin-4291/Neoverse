@@ -69,7 +69,19 @@ const PixiApp: React.FC<PixiAppProps> = ({
         appRef.current.destroy();
       }
     };
-  }, []);
+  }, [
+    setErrorModal,
+    setFailedConnectionMessage,
+    setLoadingText,
+    setModal,
+    access_token,
+    initialSkin,
+    mapData,
+    realmId,
+    uid,
+    username,
+    shareId,
+  ]);
   return (
     <div id="app-container" className={`overflow-hidden ${className}`}></div>
   );

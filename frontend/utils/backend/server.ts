@@ -83,7 +83,7 @@ class Server {
     }
   }
   public async getPlayersInRoom(roomIndex: number) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();

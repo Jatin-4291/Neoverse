@@ -59,7 +59,7 @@ const PlayClient: React.FC<PlayClientProps> = ({
       signal.off("showDisconnectModal", onShowDisconnectModal);
       signal.off("switchSkin", onSwitchSkin);
     };
-  }, []);
+  }, [setDisconnectedMessage, setErrorModal]);
 
   return (
     <AgoraVideoChatProvider uid={uid}>

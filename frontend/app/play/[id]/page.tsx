@@ -15,7 +15,7 @@ export default async function Play({ params, searchParams }: PlayPageProps) {
   const { id } = await params; // 👈 await required
   const { shareId } = await searchParams; // 👈 await required
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

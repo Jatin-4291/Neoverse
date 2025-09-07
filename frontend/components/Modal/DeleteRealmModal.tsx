@@ -17,7 +17,7 @@ const DeleteRealmModal: React.FC<DeleteRealmModalProps> = () => {
   const [input, setInput] = useState<string>("");
 
   const onClickDelete = async () => {
-    const supabase = createClient();
+    const supabase = await createClient();
     setLoading(true);
 
     const { error } = await supabase

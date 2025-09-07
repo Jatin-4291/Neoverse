@@ -1,4 +1,3 @@
-/*eslint-disable-next-line @typescript-eslint/no-unsafe-function-type*/
 /* eslint-disable @typescript-eslint/no-unsafe-function-type*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
 class Signal {
