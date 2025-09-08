@@ -9,6 +9,8 @@ import { useModal } from "@/app/hooks/useModal";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import Image from "next/image";
+console.log(process.env.NEXT_PUBLIC_BASE_URL);
+
 type DesktopRealmItemProps = {
   name: string;
   id: string;

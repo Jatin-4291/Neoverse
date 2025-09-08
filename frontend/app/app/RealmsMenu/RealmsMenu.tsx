@@ -52,7 +52,7 @@ const RealmsMenu: React.FC<RealmsMenuProps> = ({
     );
 
     if (data) setPlayerCounts(data.playerCounts);
-    if (error) toast.error("Failed to load player counts.");
+    if (error) console.log(error.message);
   }, [realms, supabase]);
 
   useEffect(() => {

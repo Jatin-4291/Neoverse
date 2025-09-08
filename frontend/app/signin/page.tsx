@@ -1,6 +1,7 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import GoogleSignInButton from "./GoogleSignInButton";
+console.log(process.env.NEXT_PUBLIC_BASE_URL);
 
 export default function Login() {
   const signInWithGoogle = async () => {
